@@ -5,534 +5,583 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>无忧物流-标准 区域定价工具</title>
 
-<!-- ===== 登录页样式 ===== -->
 <style>
-  #fakeLogin {
-    position: fixed;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    z-index: 99999;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Microsoft YaHei', sans-serif;
-    overflow: hidden;
-    background: #0b0f1e;
-  }
-
-  #fakeLogin .bg-layer {
-    position: absolute;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    background:
-      radial-gradient(ellipse at 20% 20%, #ff2e88 0%, transparent 50%),
-      radial-gradient(ellipse at 80% 30%, #7c3aed 0%, transparent 50%),
-      radial-gradient(ellipse at 60% 80%, #06b6d4 0%, transparent 50%),
-      radial-gradient(ellipse at 30% 90%, #f97316 0%, transparent 50%),
-      linear-gradient(135deg, #1a0b2e 0%, #16213e 50%, #0f172a 100%);
-    animation: bgPulse 12s ease-in-out infinite alternate;
-  }
-
-  @keyframes bgPulse {
-    0% { transform: scale(1) rotate(0deg); filter: hue-rotate(0deg); }
-    100% { transform: scale(1.1) rotate(3deg); filter: hue-rotate(30deg); }
-  }
-
-  #fakeLogin .grid-layer {
-    position: absolute;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    background-image:
-      linear-gradient(rgba(255,255,255,.04) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(255,255,255,.04) 1px, transparent 1px);
-    background-size: 60px 60px;
-    animation: gridMove 20s linear infinite;
-    pointer-events: none;
-  }
-
-  @keyframes gridMove {
-    0% { background-position: 0 0; }
-    100% { background-position: 60px 60px; }
-  }
-
-  #fakeLogin .light-beam {
-    position: absolute;
-    top: -50%;
-    left: -50%;
-    width: 200%;
-    height: 200%;
-    background: conic-gradient(
-      from 0deg at 50% 50%,
-      transparent 0deg,
-      rgba(255,46,136,.15) 60deg,
-      transparent 120deg,
-      rgba(124,58,237,.15) 180deg,
-      transparent 240deg,
-      rgba(6,182,212,.15) 300deg,
-      transparent 360deg
-    );
-    animation: beamRotate 25s linear infinite;
-    pointer-events: none;
-  }
-
-  @keyframes beamRotate {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-  }
-
-  #fakeLogin .particles {
-    position: absolute;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    pointer-events: none;
-    overflow: hidden;
-  }
-
-  #fakeLogin .particle {
-    position: absolute;
-    border-radius: 50%;
-    animation: floatUp linear infinite;
-  }
-
-  @keyframes floatUp {
-    0% { transform: translateY(100vh) scale(0); opacity: 0; }
-    10% { opacity: .9; }
-    90% { opacity: .9; }
-    100% { transform: translateY(-100px) scale(1.3); opacity: 0; }
-  }
-
-  #fakeLogin .float-icon {
-    position: absolute;
-    color: rgba(255,255,255,.08);
-    pointer-events: none;
-    animation: floatIcon ease-in-out infinite;
-    filter: drop-shadow(0 0 20px rgba(255,46,136,.3));
-  }
-
-  @keyframes floatIcon {
-    0%, 100% { transform: translateY(0) rotate(0deg); }
-    50% { transform: translateY(-40px) rotate(12deg); }
-  }
-
-  #fakeLogin .login-card {
-    position: relative;
-    z-index: 10;
-    width: 400px;
-    padding: 44px 40px;
-    background: rgba(255,255,255,.07);
-    backdrop-filter: blur(24px);
-    -webkit-backdrop-filter: blur(24px);
-    border-radius: 24px;
-    border: 1px solid rgba(255,255,255,.15);
-    box-shadow:
-      0 24px 80px rgba(255,46,136,.15),
-      0 24px 80px rgba(124,58,237,.15),
-      inset 0 1px 0 rgba(255,255,255,.15);
-    animation: cardIn .8s cubic-bezier(.2,.8,.2,1);
-    overflow: hidden;
-  }
-
-  #fakeLogin .login-card::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0;
-    width: 100%; height: 3px;
-    background: linear-gradient(90deg, #ff2e88, #7c3aed, #06b6d4, #f97316);
-    background-size: 300% 100%;
-    animation: topBar 4s linear infinite;
-  }
-
-  @keyframes topBar {
-    0% { background-position: 0% 50%; }
-    100% { background-position: 300% 50%; }
-  }
-
-  @keyframes cardIn {
-    0% { opacity: 0; transform: translateY(40px) scale(.95); }
-    100% { opacity: 1; transform: translateY(0) scale(1); }
-  }
-
-  #fakeLogin .logo-area {
-    text-align: center;
-    margin-bottom: 36px;
-  }
-
-  #fakeLogin .logo-circle {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 64px; height: 64px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, #ff2e88, #7c3aed);
-    margin-bottom: 18px;
-    position: relative;
-    animation: logoPulse 2.5s ease-in-out infinite;
-  }
-
-  #fakeLogin .logo-circle::before {
-    content: '';
-    position: absolute;
-    inset: -4px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, #ff2e88, #7c3aed, #06b6d4, #f97316);
-    background-size: 300% 300%;
-    animation: logoRing 3s linear infinite;
-    z-index: -1;
-  }
-
-  @keyframes logoRing {
-    0% { background-position: 0% 50%; }
-    100% { background-position: 300% 50%; }
-  }
-
-  @keyframes logoPulse {
-    0%, 100% { box-shadow: 0 0 30px rgba(255,46,136,.6); }
-    50% { box-shadow: 0 0 50px rgba(124,58,237,.9); }
-  }
-
-  #fakeLogin .logo-circle svg {
-    width: 32px; height: 32px;
-    fill: #fff;
-  }
-
-  #fakeLogin .logo-title {
-    font-size: 24px;
-    font-weight: 800;
-    letter-spacing: 1px;
-    margin-bottom: 8px;
-    background: linear-gradient(90deg, #ff2e88, #7c3aed, #06b6d4);
-    background-size: 200% 100%;
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
-    animation: titleFlow 4s linear infinite;
-  }
-
-  @keyframes titleFlow {
-    0% { background-position: 0% 50%; }
-    100% { background-position: 200% 50%; }
-  }
-
-  #fakeLogin .logo-sub {
-    font-size: 11px;
-    color: rgba(255,255,255,.45);
-    letter-spacing: 3px;
-    text-transform: uppercase;
-  }
-
-  #fakeLogin .input-group {
-    margin-bottom: 18px;
-    position: relative;
-  }
-
-  #fakeLogin .input-group label {
-    display: block;
-    font-size: 12px;
-    color: rgba(255,255,255,.65);
-    margin-bottom: 8px;
-    font-weight: 500;
-    letter-spacing: .5px;
-  }
-
-  #fakeLogin .input-group input {
-    width: 100%;
-    padding: 13px 16px;
-    background: rgba(255,255,255,.05);
-    border: 1px solid rgba(255,255,255,.12);
-    border-radius: 12px;
-    font-size: 14px;
-    color: #fff;
-    outline: none;
-    transition: all .3s;
-    box-sizing: border-box;
-  }
-
-  #fakeLogin .input-group input::placeholder {
-    color: rgba(255,255,255,.3);
-  }
-
-  #fakeLogin .input-group input:focus {
-    background: rgba(255,255,255,.09);
-    border-color: rgba(255,46,136,.7);
-    box-shadow:
-      0 0 0 4px rgba(255,46,136,.15),
-      0 0 24px rgba(255,46,136,.4);
-  }
-
-  #fakeLogin .login-btn {
-    width: 100%;
-    padding: 14px;
-    margin-top: 10px;
-    background: linear-gradient(135deg, #ff2e88, #7c3aed, #f97316);
-    background-size: 200% 200%;
-    color: #fff;
-    border: none;
-    border-radius: 12px;
-    font-size: 15px;
-    font-weight: 700;
-    letter-spacing: 3px;
-    cursor: pointer;
-    position: relative;
-    overflow: hidden;
-    box-shadow: 0 10px 30px rgba(255,46,136,.4);
-    transition: all .3s;
-    animation: btnFlow 5s linear infinite;
-  }
-
-  @keyframes btnFlow {
-    0% { background-position: 0% 50%; }
-    100% { background-position: 200% 50%; }
-  }
-
-  #fakeLogin .login-btn::before {
-    content: '';
-    position: absolute;
-    top: 0; left: -100%;
-    width: 100%; height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255,255,255,.5), transparent);
-    transition: left .7s;
-  }
-
-  #fakeLogin .login-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 14px 40px rgba(255,46,136,.6);
-  }
-
-  #fakeLogin .login-btn:hover::before {
-    left: 100%;
-  }
-
-  #fakeLogin .login-btn:active {
-    transform: translateY(0);
-  }
-
-  #fakeLogin .footer-note {
-    text-align: center;
-    font-size: 11px;
-    color: rgba(255,255,255,.3);
-    margin-top: 22px;
-    letter-spacing: 1px;
-  }
-</style>
-
-<!-- ===== 工具本体样式 ===== -->
-<style>
-  *{box-sizing:border-box}
+  /* ============ 全局 ============ */
+  *{box-sizing:border-box;margin:0;padding:0}
   html,body{height:100%}
   body{
-    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Microsoft YaHei",sans-serif;
-    margin:0;padding:10px 16px;
-    background:linear-gradient(160deg,#eef2f7 0%,#e8eef5 50%,#e3ebf3 100%);
-    background-attachment:fixed;
-    color:#2c3e50;
-    font-size:13px;
+    font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI","Microsoft YaHei",sans-serif;
+    background:#0a0612;
+    color:#e8e3f5;
     overflow-x:hidden;
+    -webkit-font-smoothing:antialiased;
   }
-  h1{font-size:16px;margin:0 0 8px;color:#c2410c;display:inline-block}
-  .sub{color:#64748b;font-size:12px;margin-left:12px;display:inline-block}
 
+  /* ============ 登录页 ============ */
+  #fakeLogin{
+    position:fixed;inset:0;z-index:99999;
+    display:flex;align-items:center;justify-content:center;
+    overflow:hidden;
+    background:radial-gradient(ellipse at 30% 20%, #2a1650 0%, transparent 55%),
+               radial-gradient(ellipse at 75% 75%, #3d1a6e 0%, transparent 55%),
+               radial-gradient(ellipse at 50% 50%, #1a0b3a 0%, #0a0612 100%);
+  }
+
+  /* 动态光斑 */
+  .orb{
+    position:absolute;border-radius:50%;
+    filter:blur(80px);opacity:.55;
+    pointer-events:none;
+    animation:orbFloat 18s ease-in-out infinite;
+  }
+  .orb.o1{width:500px;height:500px;background:#7c3aed;top:-100px;left:-100px;}
+  .orb.o2{width:400px;height:400px;background:#c026d3;top:50%;right:-100px;animation-delay:-6s;}
+  .orb.o3{width:350px;height:350px;background:#8b5cf6;bottom:-100px;left:30%;animation-delay:-12s;}
+
+  @keyframes orbFloat{
+    0%,100%{transform:translate(0,0) scale(1);}
+    33%{transform:translate(60px,-40px) scale(1.1);}
+    66%{transform:translate(-40px,50px) scale(.95);}
+  }
+
+  /* 鼠标跟随光斑 */
+  .cursor-glow{
+    position:fixed;width:600px;height:600px;
+    border-radius:50%;pointer-events:none;
+    background:radial-gradient(circle, rgba(168,85,247,.25) 0%, transparent 65%);
+    transform:translate(-50%,-50%);
+    transition:transform .15s ease-out;
+    z-index:1;
+    mix-blend-mode:screen;
+  }
+
+  /* 网格 */
+  .login-grid{
+    position:absolute;inset:0;
+    background-image:
+      linear-gradient(rgba(168,85,247,.06) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(168,85,247,.06) 1px, transparent 1px);
+    background-size:50px 50px;
+    mask-image:radial-gradient(ellipse at center, #000 30%, transparent 75%);
+    -webkit-mask-image:radial-gradient(ellipse at center, #000 30%, transparent 75%);
+    animation:gridDrift 30s linear infinite;
+    pointer-events:none;
+  }
+  @keyframes gridDrift{
+    0%{background-position:0 0;}
+    100%{background-position:50px 50px;}
+  }
+
+  /* 浮动图标 */
+  .float-icon{
+    position:absolute;font-size:60px;
+    opacity:.08;pointer-events:none;
+    animation:floatIcon 10s ease-in-out infinite;
+    filter:drop-shadow(0 0 20px rgba(168,85,247,.5));
+  }
+  @keyframes floatIcon{
+    0%,100%{transform:translateY(0) rotate(0);}
+    50%{transform:translateY(-30px) rotate(8deg);}
+  }
+
+  /* 粒子 */
+  .particles{position:absolute;inset:0;pointer-events:none;overflow:hidden;}
+  .particle{
+    position:absolute;border-radius:50%;
+    animation:floatUp linear infinite;
+  }
+  @keyframes floatUp{
+    0%{transform:translateY(100vh) scale(0);opacity:0;}
+    10%,90%{opacity:.9;}
+    100%{transform:translateY(-100px) scale(1.3);opacity:0;}
+  }
+
+  /* ============ 登录卡片 ============ */
+  .login-card{
+    position:relative;z-index:10;
+    width:400px;padding:46px 40px;
+    background:rgba(30,15,60,.45);
+    backdrop-filter:blur(40px) saturate(180%);
+    -webkit-backdrop-filter:blur(40px) saturate(180%);
+    border-radius:28px;
+    border:1px solid rgba(168,85,247,.25);
+    box-shadow:
+      0 30px 90px rgba(124,58,237,.4),
+      inset 0 1px 0 rgba(255,255,255,.15),
+      inset 0 -1px 0 rgba(168,85,247,.15);
+    animation:cardIn .9s cubic-bezier(.2,.8,.2,1);
+    overflow:hidden;
+  }
+  .login-card::before{
+    content:'';position:absolute;
+    top:-50%;left:-50%;width:200%;height:200%;
+    background:conic-gradient(from 0deg,
+      transparent 0deg, rgba(168,85,247,.12) 90deg,
+      transparent 180deg, rgba(217,70,239,.12) 270deg,
+      transparent 360deg);
+    animation:cardShine 12s linear infinite;
+    pointer-events:none;
+  }
+  @keyframes cardShine{
+    0%{transform:rotate(0deg);}
+    100%{transform:rotate(360deg);}
+  }
+  @keyframes cardIn{
+    0%{opacity:0;transform:translateY(40px) scale(.95);}
+    100%{opacity:1;transform:translateY(0) scale(1);}
+  }
+  @keyframes shake{
+    0%,100%{transform:translateX(0);}
+    20%{transform:translateX(-10px);}
+    40%{transform:translateX(10px);}
+    60%{transform:translateX(-6px);}
+    80%{transform:translateX(6px);}
+  }
+
+  .login-card .inner{position:relative;z-index:2;}
+
+  /* Logo */
+  .logo-area{text-align:center;margin-bottom:36px;}
+  .logo-circle{
+    display:inline-flex;align-items:center;justify-content:center;
+    width:72px;height:72px;border-radius:22px;
+    background:linear-gradient(135deg,#8b5cf6,#d946ef);
+    box-shadow:
+      0 12px 40px rgba(168,85,247,.6),
+      inset 0 1px 0 rgba(255,255,255,.3);
+    margin-bottom:20px;
+    position:relative;
+    animation:logoPulse 3s ease-in-out infinite;
+  }
+  .logo-circle::after{
+    content:'';position:absolute;inset:-6px;border-radius:26px;
+    background:linear-gradient(135deg,#8b5cf6,#d946ef,#8b5cf6);
+    background-size:300% 300%;
+    animation:logoRing 4s linear infinite;
+    z-index:-1;opacity:.5;filter:blur(8px);
+  }
+  @keyframes logoRing{
+    0%{background-position:0% 50%;}
+    100%{background-position:300% 50%;}
+  }
+  @keyframes logoPulse{
+    0%,100%{box-shadow:0 12px 40px rgba(168,85,247,.6),inset 0 1px 0 rgba(255,255,255,.3);}
+    50%{box-shadow:0 12px 60px rgba(217,70,239,.9),inset 0 1px 0 rgba(255,255,255,.3);}
+  }
+  .logo-circle svg{width:36px;height:36px;fill:#fff;}
+
+  .logo-title{
+    font-size:26px;font-weight:800;letter-spacing:1px;margin-bottom:8px;
+    background:linear-gradient(90deg,#c4b5fd,#e9d5ff,#f0abfc);
+    background-size:200% 100%;
+    -webkit-background-clip:text;background-clip:text;
+    -webkit-text-fill-color:transparent;
+    animation:titleFlow 4s linear infinite;
+  }
+  @keyframes titleFlow{
+    0%{background-position:0% 50%;}
+    100%{background-position:200% 50%;}
+  }
+  .logo-sub{
+    font-size:11px;color:rgba(196,181,253,.5);
+    letter-spacing:3px;text-transform:uppercase;
+  }
+
+  /* 输入框 */
+  .input-group{margin-bottom:18px;position:relative;}
+  .input-group label{
+    display:block;font-size:12px;
+    color:rgba(196,181,253,.7);
+    margin-bottom:8px;font-weight:500;letter-spacing:.5px;
+  }
+  .input-group input{
+    width:100%;padding:14px 18px;
+    background:rgba(255,255,255,.04);
+    border:1px solid rgba(168,85,247,.2);
+    border-radius:14px;
+    font-size:14px;color:#fff;outline:none;
+    transition:all .3s;
+    backdrop-filter:blur(10px);
+  }
+  .input-group input::placeholder{color:rgba(196,181,253,.3);}
+  .input-group input:focus{
+    background:rgba(168,85,247,.08);
+    border-color:rgba(217,70,239,.6);
+    box-shadow:
+      0 0 0 4px rgba(168,85,247,.15),
+      0 0 30px rgba(168,85,247,.4);
+  }
+
+  /* 按钮 */
+  .login-btn{
+    width:100%;padding:15px;margin-top:10px;
+    background:linear-gradient(135deg,#8b5cf6,#d946ef,#8b5cf6);
+    background-size:200% 200%;
+    color:#fff;border:none;border-radius:14px;
+    font-size:15px;font-weight:700;letter-spacing:3px;
+    cursor:pointer;position:relative;overflow:hidden;
+    box-shadow:0 12px 40px rgba(168,85,247,.5);
+    transition:all .3s;
+    animation:btnFlow 5s linear infinite;
+    backdrop-filter:blur(10px);
+  }
+  @keyframes btnFlow{
+    0%{background-position:0% 50%;}
+    100%{background-position:200% 50%;}
+  }
+  .login-btn::before{
+    content:'';position:absolute;top:0;left:-100%;
+    width:100%;height:100%;
+    background:linear-gradient(90deg,transparent,rgba(255,255,255,.5),transparent);
+    transition:left .7s;
+  }
+  .login-btn:hover{
+    transform:translateY(-2px);
+    box-shadow:0 18px 50px rgba(217,70,239,.7);
+  }
+  .login-btn:hover::before{left:100%;}
+
+  .error-msg{
+    display:none;margin-top:12px;padding:10px 14px;
+    background:rgba(239,68,68,.12);
+    border:1px solid rgba(239,68,68,.35);
+    border-radius:12px;
+    color:#fca5a5;font-size:12px;text-align:center;
+  }
+
+  .footer-note{
+    text-align:center;font-size:11px;
+    color:rgba(196,181,253,.3);
+    margin-top:24px;letter-spacing:1px;
+  }
+
+  /* ============ 工具页 ============ */
+  #mainTool{
+    position:relative;z-index:5;
+    min-height:100vh;
+    padding:20px 24px 40px;
+    background:
+      radial-gradient(ellipse at 15% 10%, rgba(124,58,237,.15) 0%, transparent 50%),
+      radial-gradient(ellipse at 85% 90%, rgba(217,70,239,.12) 0%, transparent 50%),
+      #0a0612;
+  }
+
+  /* 工具页背景动态光斑 */
+  #mainTool .orb{opacity:.35;filter:blur(100px);}
+  #mainTool .orb.m1{width:600px;height:600px;background:#7c3aed;top:-200px;left:-200px;}
+  #mainTool .orb.m2{width:500px;height:500px;background:#d946ef;bottom:-150px;right:-150px;animation-delay:-9s;}
+
+  /* 顶部仪表盘 */
+  .dash-header{
+    display:flex;align-items:center;justify-content:space-between;
+    margin-bottom:20px;flex-wrap:wrap;gap:16px;
+  }
+  .dash-title{
+    font-size:22px;font-weight:800;
+    background:linear-gradient(90deg,#c4b5fd,#f0abfc);
+    -webkit-background-clip:text;background-clip:text;
+    -webkit-text-fill-color:transparent;
+    display:flex;align-items:center;gap:10px;
+  }
+  .dash-title::before{
+    content:'';width:8px;height:8px;border-radius:50%;
+    background:#a855f7;box-shadow:0 0 12px #a855f7;
+    animation:dotPulse 2s ease-in-out infinite;
+  }
+  @keyframes dotPulse{
+    0%,100%{opacity:1;transform:scale(1);}
+    50%{opacity:.5;transform:scale(1.4);}
+  }
+  .dash-time{
+    font-size:12px;color:rgba(196,181,253,.5);
+    font-family:monospace;
+    padding:6px 12px;
+    background:rgba(168,85,247,.08);
+    border:1px solid rgba(168,85,247,.2);
+    border-radius:10px;
+  }
+
+  /* 统计卡片 */
+  .stats-row{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+    gap:14px;margin-bottom:20px;
+  }
+  .stat-card{
+    background:rgba(30,15,60,.4);
+    backdrop-filter:blur(24px) saturate(180%);
+    -webkit-backdrop-filter:blur(24px) saturate(180%);
+    border:1px solid rgba(168,85,247,.2);
+    border-radius:18px;
+    padding:18px 20px;
+    position:relative;overflow:hidden;
+    transition:all .3s;
+  }
+  .stat-card::before{
+    content:'';position:absolute;top:0;left:0;
+    width:100%;height:2px;
+    background:linear-gradient(90deg,transparent,#a855f7,transparent);
+    opacity:.6;
+  }
+  .stat-card:hover{
+    transform:translateY(-3px);
+    border-color:rgba(217,70,239,.4);
+    box-shadow:0 12px 40px rgba(168,85,247,.25);
+  }
+  .stat-label{
+    font-size:11px;color:rgba(196,181,253,.6);
+    letter-spacing:1px;text-transform:uppercase;
+    margin-bottom:8px;
+  }
+  .stat-value{
+    font-size:24px;font-weight:800;
+    background:linear-gradient(90deg,#e9d5ff,#f0abfc);
+    -webkit-background-clip:text;background-clip:text;
+    -webkit-text-fill-color:transparent;
+  }
+  .stat-sub{
+    font-size:11px;color:rgba(196,181,253,.4);
+    margin-top:6px;
+  }
+
+  /* 参数栏 */
   .topbar{
-    display:flex;flex-wrap:wrap;align-items:center;gap:8px;
-    background:#fff;
-    border-radius:8px;
-    padding:8px 12px;
-    border:1px solid #d8e2ec;
-    box-shadow:0 1px 6px rgba(44,62,80,.06);
-    margin-bottom:8px;
+    display:flex;flex-wrap:wrap;align-items:center;gap:10px;
+    background:rgba(30,15,60,.4);
+    backdrop-filter:blur(24px) saturate(180%);
+    -webkit-backdrop-filter:blur(24px) saturate(180%);
+    border:1px solid rgba(168,85,247,.2);
+    border-radius:18px;
+    padding:14px 18px;
+    margin-bottom:14px;
   }
-  .topbar label{font-size:12px;color:#475569;font-weight:500;white-space:nowrap}
+  .topbar label{
+    font-size:12px;color:rgba(196,181,253,.7);
+    font-weight:500;white-space:nowrap;
+  }
   .topbar input,.topbar select{
-    padding:5px 8px;
-    border:1px solid #cbd5e1;
-    border-radius:5px;
-    font-size:12px;
-    outline:none;
-    background:#fff;
-    color:#2c3e50;
-    width:70px;
+    padding:7px 10px;
+    background:rgba(255,255,255,.04);
+    border:1px solid rgba(168,85,247,.2);
+    border-radius:10px;
+    font-size:12px;color:#fff;outline:none;
+    transition:all .25s;
+    width:74px;
   }
-  .topbar input.wide{width:90px}
+  .topbar input.wide{width:94px;}
   .topbar input:focus,.topbar select:focus{
-    border-color:#ea580c;
-    box-shadow:0 0 0 2px rgba(234,88,12,.12);
+    border-color:rgba(217,70,239,.6);
+    box-shadow:0 0 0 3px rgba(168,85,247,.15);
   }
+  .topbar select option{background:#1a0b3a;color:#fff;}
 
+  /* SKU 栏 */
   .skubar{
-    display:flex;flex-wrap:wrap;align-items:center;gap:8px;
-    background:#fff;
-    border-radius:8px;
-    padding:8px 12px;
-    border:1px solid #d8e2ec;
-    box-shadow:0 1px 6px rgba(44,62,80,.06);
-    margin-bottom:8px;
+    display:flex;flex-wrap:wrap;align-items:center;gap:10px;
+    background:rgba(30,15,60,.4);
+    backdrop-filter:blur(24px) saturate(180%);
+    -webkit-backdrop-filter:blur(24px) saturate(180%);
+    border:1px solid rgba(168,85,247,.2);
+    border-radius:18px;
+    padding:14px 18px;
+    margin-bottom:14px;
   }
-  .skubar label{font-size:12px;color:#475569;font-weight:500;white-space:nowrap}
+  .skubar label{
+    font-size:12px;color:rgba(196,181,253,.7);
+    font-weight:500;white-space:nowrap;
+  }
   .skubar input{
-    padding:5px 8px;
-    border:1px solid #cbd5e1;
-    border-radius:5px;
-    font-size:12px;
-    outline:none;
-    background:#fff;
-    color:#2c3e50;
-    width:120px;
+    padding:8px 12px;
+    background:rgba(255,255,255,.04);
+    border:1px solid rgba(168,85,247,.2);
+    border-radius:10px;
+    font-size:13px;color:#fff;outline:none;
+    transition:all .25s;
+    width:140px;
   }
   .skubar input:focus{
-    border-color:#ea580c;
-    box-shadow:0 0 0 2px rgba(234,88,12,.12);
+    border-color:rgba(217,70,239,.6);
+    box-shadow:0 0 0 3px rgba(168,85,247,.15);
   }
 
+  /* 按钮 */
   button{
-    border:none;border-radius:6px;
-    padding:6px 14px;font-size:12px;cursor:pointer;
-    font-weight:600;transition:all .15s;
+    border:none;border-radius:12px;
+    padding:8px 18px;font-size:13px;cursor:pointer;
+    font-weight:600;transition:all .25s;
     white-space:nowrap;
   }
   button.primary{
-    background:linear-gradient(135deg,#f4511e,#d84315);
+    background:linear-gradient(135deg,#8b5cf6,#d946ef);
     color:#fff;
-    box-shadow:0 3px 10px rgba(216,67,21,.45);
-    padding:8px 20px;
+    box-shadow:0 8px 24px rgba(168,85,247,.5);
+    padding:10px 24px;
     font-size:13px;
   }
   button.primary:hover{
-    background:linear-gradient(135deg,#d84315,#bf360c);
-    box-shadow:0 5px 14px rgba(216,67,21,.55);
-    transform:translateY(-1px);
+    transform:translateY(-2px);
+    box-shadow:0 14px 36px rgba(217,70,239,.7);
   }
   button.secondary{
-    background:linear-gradient(135deg,#14b8a6,#0d9488);
-    color:#fff;
-    box-shadow:0 3px 10px rgba(13,148,136,.4);
-    padding:8px 20px;
+    background:rgba(168,85,247,.12);
+    color:#c4b5fd;
+    border:1px solid rgba(168,85,247,.3);
+    padding:10px 24px;
     font-size:13px;
   }
   button.secondary:hover{
-    background:linear-gradient(135deg,#0d9488,#0f766e);
-    box-shadow:0 5px 14px rgba(13,148,136,.5);
-    transform:translateY(-1px);
+    background:rgba(168,85,247,.2);
+    border-color:rgba(217,70,239,.5);
+    transform:translateY(-2px);
   }
   button.copy{
-    background:linear-gradient(135deg,#66bb6a,#43a047);
+    background:linear-gradient(135deg,#10b981,#059669);
     color:#fff;
-    padding:4px 12px;font-size:11px;
-    box-shadow:0 2px 6px rgba(67,160,71,.3);
+    padding:5px 14px;font-size:11px;
+    box-shadow:0 4px 12px rgba(16,185,129,.4);
   }
   button.copy:hover{
-    background:linear-gradient(135deg,#43a047,#2e7d32);
-    transform:translateY(-1px);
+    transform:translateY(-2px);
+    box-shadow:0 8px 20px rgba(16,185,129,.6);
   }
 
-  #results{background:transparent}
+  /* 汇总 */
+  .summary{
+    display:flex;gap:24px;flex-wrap:wrap;
+    font-size:13px;margin-bottom:14px;
+    padding:14px 20px;
+    background:rgba(30,15,60,.4);
+    backdrop-filter:blur(24px) saturate(180%);
+    -webkit-backdrop-filter:blur(24px) saturate(180%);
+    border:1px solid rgba(168,85,247,.2);
+    border-radius:18px;
+  }
+  .summary span{
+    color:#f0abfc;font-weight:700;
+    background:linear-gradient(90deg,#e9d5ff,#f0abfc);
+    -webkit-background-clip:text;background-clip:text;
+    -webkit-text-fill-color:transparent;
+  }
+
+  /* 结果 */
+  #results{position:relative;z-index:2;}
   .row-label{
-    font-size:11px;color:#64748b;margin:6px 0 2px;font-weight:600;
+    font-size:12px;color:rgba(196,181,253,.6);
+    margin:10px 0 6px;font-weight:600;
+    letter-spacing:.5px;
   }
   .sku-title{
-    display:flex;align-items:center;gap:10px;
-    font-size:13px;font-weight:700;color:#c2410c;
-    margin:8px 0 4px;flex-wrap:wrap;
+    display:flex;align-items:center;gap:12px;
+    font-size:14px;font-weight:700;
+    background:linear-gradient(90deg,#e9d5ff,#f0abfc);
+    -webkit-background-clip:text;background-clip:text;
+    -webkit-text-fill-color:transparent;
+    margin:14px 0 8px;flex-wrap:wrap;
+  }
+  .sku-title button{
+    -webkit-text-fill-color:#fff;
   }
 
   .table-wrap{
-    overflow-x:auto;
-    overflow-y:visible;
-    border-radius:6px;
-    border:1px solid #d8e2ec;
-    margin-bottom:8px;
-    background:#fff;
+    overflow-x:auto;overflow-y:visible;
+    border-radius:14px;
+    border:1px solid rgba(168,85,247,.2);
+    margin-bottom:12px;
+    background:rgba(20,10,45,.5);
+    backdrop-filter:blur(20px);
+    -webkit-backdrop-filter:blur(20px);
   }
   table{
-    border-collapse:collapse;
-    font-size:12px;
-    table-layout:fixed;
-    min-width:100%;
+    border-collapse:collapse;font-size:12px;
+    table-layout:fixed;min-width:100%;
   }
   th,td{
-    border:1px solid #e2e8f0;
-    padding:4px 8px;
-    text-align:right;
+    border:1px solid rgba(168,85,247,.12);
+    padding:6px 9px;text-align:right;
     white-space:nowrap;
-    overflow:visible;
   }
   th:first-child,td:first-child{
     text-align:left;
-    background:linear-gradient(180deg,#e3ebf3,#d8e2ec);
-    color:#1e3a5f;font-weight:700;
+    background:rgba(168,85,247,.12);
+    color:#e9d5ff;font-weight:700;
     position:sticky;left:0;z-index:2;
-    width:70px;min-width:70px;
+    width:74px;min-width:74px;
     font-size:11px;
+    backdrop-filter:blur(10px);
   }
   th:not(:first-child),td:not(:first-child){
-    width:58px;min-width:58px;
+    width:62px;min-width:62px;
   }
   th{
-    background:linear-gradient(180deg,#e3ebf3,#d8e2ec);
-    text-align:center;color:#1e3a5f;font-weight:700;
-    border-bottom:2px solid #b8c8d8;
+    background:rgba(168,85,247,.1);
+    text-align:center;color:#e9d5ff;font-weight:700;
+    border-bottom:2px solid rgba(168,85,247,.3);
     font-size:11px;
+    position:sticky;top:0;
   }
-  tr:nth-child(even){background:#f8fafc}
-  tr:hover{background:#eef4fa}
+  tbody tr:nth-child(even){background:rgba(168,85,247,.03);}
+  tbody tr:hover{background:rgba(168,85,247,.08);}
+  td{color:#d8cff0;}
 
-  .summary{
-    display:flex;gap:18px;flex-wrap:wrap;
-    font-size:12px;margin-bottom:8px;
-    padding:6px 12px;
-    background:#fff;
-    border-radius:6px;
-    border:1px solid #d8e2ec;
-    box-shadow:0 1px 4px rgba(44,62,80,.05);
-  }
-  .summary span{color:#c2410c;font-weight:700}
-
+  /* Toast */
   .toast{
-    position:fixed;top:16px;left:50%;transform:translateX(-50%);
-    background:linear-gradient(135deg,#43a047,#2e7d32);
-    color:#fff;padding:8px 18px;border-radius:6px;font-size:12px;
-    z-index:999999;opacity:0;transition:opacity .3s;pointer-events:none;
-    box-shadow:0 4px 12px rgba(46,125,50,.35);
+    position:fixed;top:24px;left:50%;transform:translateX(-50%);
+    background:linear-gradient(135deg,#8b5cf6,#d946ef);
+    color:#fff;padding:12px 24px;border-radius:14px;
+    font-size:13px;font-weight:600;
+    z-index:999999;opacity:0;
+    transition:opacity .3s, transform .3s;
+    pointer-events:none;
+    box-shadow:0 12px 40px rgba(168,85,247,.6);
+    backdrop-filter:blur(10px);
   }
-  .toast.show{opacity:1}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(4px);}
 </style>
 </head>
 <body>
 
-<!-- ===== 登录遮罩层 ===== -->
+<!-- ============ 登录页 ============ -->
 <div id="fakeLogin">
-  <div class="bg-layer"></div>
-  <div class="grid-layer"></div>
-  <div class="light-beam"></div>
+  <div class="orb o1"></div>
+  <div class="orb o2"></div>
+  <div class="orb o3"></div>
+  <div class="login-grid"></div>
+  <div class="cursor-glow" id="cursorGlow"></div>
   <div class="particles" id="particles"></div>
 
-  <div class="float-icon" style="top:12%;left:8%;font-size:70px;animation-duration:8s;">📦</div>
-  <div class="float-icon" style="top:70%;left:85%;font-size:80px;animation-duration:10s;">✈️</div>
-  <div class="float-icon" style="top:78%;left:12%;font-size:60px;animation-duration:9s;">🚚</div>
-  <div class="float-icon" style="top:18%;left:82%;font-size:65px;animation-duration:11s;">🌐</div>
-  <div class="float-icon" style="top:45%;left:5%;font-size:50px;animation-duration:12s;">⚡</div>
-  <div class="float-icon" style="top:55%;left:92%;font-size:55px;animation-duration:7s;">🚀</div>
+  <div class="float-icon" style="top:12%;left:8%;animation-duration:9s;">📦</div>
+  <div class="float-icon" style="top:72%;left:86%;animation-duration:11s;">✈️</div>
+  <div class="float-icon" style="top:78%;left:14%;animation-duration:10s;">🚚</div>
+  <div class="float-icon" style="top:18%;left:82%;animation-duration:12s;">🌐</div>
+  <div class="float-icon" style="top:45%;left:5%;animation-duration:13s;">⚡</div>
+  <div class="float-icon" style="top:55%;left:93%;animation-duration:8s;">🚀</div>
 
-  <div class="login-card">
-    <div class="logo-area">
-      <div class="logo-circle">
-        <svg viewBox="0 0 24 24"><path d="M20 8h-3V4H3c-1.1 0-2 .9-2 2v11h2c0 1.66 1.34 3 3 3s3-1.34 3-3h6c0 1.66 1.34 3 3 3s3-1.34 3-3h2v-5l-3-4zM6 18.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm13.5-9l1.96 2.5H17V9.5h2.5zm-1.5 9c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/></svg>
+  <div class="login-card" id="loginCard">
+    <div class="inner">
+      <div class="logo-area">
+        <div class="logo-circle">
+          <svg viewBox="0 0 24 24"><path d="M20 8h-3V4H3c-1.1 0-2 .9-2 2v11h2c0 1.66 1.34 3 3 3s3-1.34 3-3h6c0 1.66 1.34 3 3 3s3-1.34 3-3h2v-5l-3-4zM6 18.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm13.5-9l1.96 2.5H17V9.5h2.5zm-1.5 9c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/></svg>
+        </div>
+        <div class="logo-title">无忧物流-标准</div>
+        <div class="logo-sub">Regional Pricing Tool</div>
       </div>
-      <div class="logo-title">无忧物流-标准</div>
-      <div class="logo-sub">Regional Pricing Tool</div>
+
+      <div class="input-group">
+        <label>账号</label>
+        <input id="fakeUser" type="text" placeholder="请输入账号" autocomplete="off">
+      </div>
+
+      <div class="input-group">
+        <label>密码</label>
+        <input id="fakePass" type="password" placeholder="请输入密码">
+      </div>
+
+      <button class="login-btn" id="fakeLoginBtn">登 录</button>
+
+      <div class="error-msg" id="loginError"></div>
+
+      <div class="footer-note">仅供内部使用 · 请勿外传</div>
     </div>
-
-    <div class="input-group">
-      <label>账号</label>
-      <input id="fakeUser" type="text" placeholder="请输入账号" autocomplete="off">
-    </div>
-
-    <div class="input-group">
-      <label>密码</label>
-      <input id="fakePass" type="password" placeholder="请输入密码">
-    </div>
-
-    <button class="login-btn" id="fakeLoginBtn">登 录</button>
-
-    <div class="footer-note">仅供内部使用 · 请勿外传</div>
   </div>
 </div>
 
@@ -540,64 +589,113 @@
 // 生成彩色粒子
 (function(){
   var container = document.getElementById('particles');
-  var colors = ['#ff2e88', '#7c3aed', '#06b6d4', '#f97316', '#10b981', '#fbbf24'];
-  for(var i = 0; i < 50; i++){
+  var colors = ['#a855f7', '#d946ef', '#8b5cf6', '#c4b5fd', '#e9d5ff', '#f0abfc'];
+  for(var i = 0; i < 55; i++){
     var p = document.createElement('div');
     p.className = 'particle';
     var color = colors[Math.floor(Math.random() * colors.length)];
     p.style.left = Math.random() * 100 + '%';
-    p.style.animationDuration = (6 + Math.random() * 12) + 's';
+    p.style.animationDuration = (7 + Math.random() * 12) + 's';
     p.style.animationDelay = (Math.random() * 12) + 's';
     var size = 2 + Math.random() * 5;
     p.style.width = size + 'px';
     p.style.height = size + 'px';
     p.style.background = color;
-    p.style.boxShadow = '0 0 ' + (size * 3) + 'px ' + color;
+    p.style.boxShadow = '0 0 ' + (size * 4) + 'px ' + color;
     container.appendChild(p);
   }
 })();
 
-// 假登录 + 进入工具动效
-document.getElementById('fakeLoginBtn').addEventListener('click', function(){
+// 鼠标跟随光斑
+(function(){
+  var glow = document.getElementById('cursorGlow');
+  document.addEventListener('mousemove', function(e){
+    glow.style.left = e.clientX + 'px';
+    glow.style.top = e.clientY + 'px';
+  });
+})();
+
+// 登录校验
+function doLogin(){
+  var user = document.getElementById('fakeUser').value.trim();
+  var pass = document.getElementById('fakePass').value.trim();
+  var err = document.getElementById('loginError');
+  var card = document.getElementById('loginCard');
+
+  if(!user || !pass){
+    err.style.display = 'block';
+    if(!user && !pass){err.textContent = '请输入账号和密码';}
+    else if(!user){err.textContent = '请输入账号';}
+    else{err.textContent = '请输入密码';}
+    card.style.animation = 'none';
+    void card.offsetWidth;
+    card.style.animation = 'shake .4s';
+    return;
+  }
+
+  err.style.display = 'none';
   var login = document.getElementById('fakeLogin');
   var main = document.getElementById('mainTool');
 
-  // 登录层淡出 + 放大
-  login.style.transition = 'opacity .5s, transform .5s';
+  login.style.transition = 'opacity .6s, transform .6s';
   login.style.opacity = '0';
-  login.style.transform = 'scale(1.08)';
+  login.style.transform = 'scale(1.06)';
 
   setTimeout(function(){
     login.style.display = 'none';
-
-    // 工具本体进场：淡入 + 上浮 + 缩放
     main.style.display = 'block';
     main.style.opacity = '0';
-    main.style.transform = 'translateY(30px) scale(.97)';
-    main.style.transition = 'opacity .7s cubic-bezier(.2,.8,.2,1), transform .7s cubic-bezier(.2,.8,.2,1)';
-
-    // 强制重绘，触发动效
+    main.style.transform = 'translateY(30px) scale(.98)';
+    main.style.transition = 'opacity .8s cubic-bezier(.2,.8,.2,1), transform .8s cubic-bezier(.2,.8,.2,1)';
     void main.offsetWidth;
-
     main.style.opacity = '1';
     main.style.transform = 'translateY(0) scale(1)';
-  }, 500);
-});
-document.getElementById('fakePass').addEventListener('keydown', function(e){
-  if(e.key === 'Enter'){
-    document.getElementById('fakeLoginBtn').click();
-  }
-});
-</script>
-<!-- ===== 登录遮罩层结束 ===== -->
+  }, 600);
+}
 
-<!-- ===== 工具本体 ===== -->
+document.getElementById('fakeLoginBtn').addEventListener('click', doLogin);
+document.getElementById('fakePass').addEventListener('keydown', function(e){if(e.key==='Enter')doLogin();});
+document.getElementById('fakeUser').addEventListener('keydown', function(e){if(e.key==='Enter')doLogin();});
+</script>
+
+<!-- ============ 工具页 ============ -->
 <div id="mainTool" style="display:none;">
+  <div class="orb m1"></div>
+  <div class="orb m2"></div>
+
   <div id="toast" class="toast">已复制</div>
 
-  <h1>无忧物流-标准 区域定价工具</h1>
-  <span class="sub">按商家实际运费计算。重量单位：g。表格可左右滑。</span>
+  <!-- 顶部仪表盘 -->
+  <div class="dash-header">
+    <div class="dash-title">无忧物流 · 区域定价工作台</div>
+    <div class="dash-time" id="liveTime">--:--:--</div>
+  </div>
 
+  <!-- 统计卡片 -->
+  <div class="stats-row">
+    <div class="stat-card">
+      <div class="stat-label">覆盖国家</div>
+      <div class="stat-value" id="statCountry">114</div>
+      <div class="stat-sub">速卖通区域定价支持</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">物流线路</div>
+      <div class="stat-value">标准小包</div>
+      <div class="stat-sub">无忧物流-标准</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">计费方式</div>
+      <div class="stat-value">max(实重·体积重)</div>
+      <div class="stat-sub">体积重 = 长×宽×高÷8000</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">重量限制</div>
+      <div class="stat-value">≤ 2kg</div>
+      <div class="stat-sub">超2kg 暂不支持</div>
+    </div>
+  </div>
+
+  <!-- 参数栏 -->
   <div class="topbar">
     <label>成本</label><input id="cost" type="number" value="500" step="0.01" class="wide">
     <label>重量g</label><input id="weight" type="number" value="100" step="1">
@@ -619,17 +717,19 @@ document.getElementById('fakePass').addEventListener('keydown', function(e){
       <option value="6000">6000</option>
       <option value="5000">5000</option>
     </select>
-    <label style="display:flex;align-items:center;gap:4px;cursor:pointer">
+    <label style="display:flex;align-items:center;gap:6px;cursor:pointer">
       <input id="useVolumetric" type="checkbox" style="width:auto"> 算抛重
     </label>
   </div>
 
+  <!-- SKU 栏 -->
   <div class="skubar">
     <label>SKU编码</label><input id="skuCode" type="text" placeholder="SKU-1">
     <button class="primary" onclick="calculateAll()">批量计算</button>
     <button class="secondary" onclick="exportCSV()">导出 CSV</button>
   </div>
 
+  <!-- 汇总 -->
   <div class="summary">
     <div>有效国家：<span id="countryCount">0</span></div>
     <div>销售价均价：<span id="avgPrice">-</span> USD</div>
@@ -640,7 +740,21 @@ document.getElementById('fakePass').addEventListener('keydown', function(e){
 </div>
 
 <script>
-/* ========== 数据：无忧物流-标准 普货小包，只保留 114 个国家 ========== */
+// 实时时间
+(function(){
+  function tick(){
+    var d = new Date();
+    var hh = String(d.getHours()).padStart(2,'0');
+    var mm = String(d.getMinutes()).padStart(2,'0');
+    var ss = String(d.getSeconds()).padStart(2,'0');
+    var el = document.getElementById('liveTime');
+    if(el) el.textContent = hh + ':' + mm + ':' + ss;
+  }
+  tick();
+  setInterval(tick, 1000);
+})();
+
+/* ========== 数据：无忧物流-标准 普货小包，114 个国家 ========== */
 var RATES = [
   {code:"RU",name:"俄罗斯",pu:[{maxG:150,p:81,r:17},{maxG:300,p:81,r:19},{maxG:2000,p:83,r:20}],fei:[{maxG:150,p:86.5,r:17},{maxG:300,p:86.5,r:19},{maxG:2000,p:90,r:20}]},
   {code:"ES",name:"西班牙",pu:[{maxG:150,p:64.67,r:19.26},{maxG:300,p:64.67,r:19.26},{maxG:2000,p:64.67,r:19.26}],fei:[{maxG:2000,p:85.41,r:19.26}]},
@@ -758,7 +872,6 @@ var RATES = [
   {code:"MN",name:"蒙古",pu:[{maxG:150,p:149.38,r:0.65},{maxG:300,p:149.38,r:0.65},{maxG:2000,p:149.38,r:0.65}],fei:[{maxG:2000,p:149.38,r:0.65}]}
 ];
 
-/* ========== 逻辑区 ========== */
 var lastResults = [];
 
 function showToast(msg){
