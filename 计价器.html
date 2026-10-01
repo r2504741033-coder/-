@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>无忧物流-标准 区域定价工具 v14</title>
+<style>
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Microsoft YaHei",sans-serif;
+    margin:0;padding:10px 16px;
+    background:linear-gradient(160deg,#eef2f7 0%,#e8eef5 50%,#e3ebf3 100%);
+    background-attachment:fixed;
+    color:#2c3e50;
+    font-size:13px;
+    overflow-x:hidden;
+  }
+  h1{font-size:16px;margin:0 0 8px;color:#c2410c;display:inline-block}
+  .sub{color:#64748b;font-size:12px;margin-left:12px;display:inline-block}
+
+  .topbar{
+    display:flex;flex-wrap:wrap;align-items:center;gap:8px;
+    background:#fff;
+    border-radius:8px;
+    padding:8px 12px;
+    border:1px solid #d8e2ec;
+    box-shadow:0 1px 6px rgba(44,62,80,.06);
+    margin-bottom:8px;
+  }
+  .topbar label{font-size:12px;color:#475569;font-weight:500;white-space:nowrap}
+  .topbar input,.topbar select{
+    padding:5px 8px;
+    border:1px solid #cbd5e1;
+    border-radius:5px;
+    font-size:12px;
+    outline:none;
+    background:#fff;
+    color:#2c3e50;
+    width:70px;
+  }
+  .topbar input.wide{width:90px}
+  .topbar input:focus,.topbar select:focus{
+    border-color:#ea580c;
+    box-shadow:0 0 0 2px rgba(234,88,12,.12);
+  }
+
+  .skubar{
+    display:flex;flex-wrap:wrap;align-items:center;gap:8px;
+    background:#fff;
+    border-radius:8px;
+    padding:8px 12px;
+    border:1px solid #d8e2ec;
+    box-shadow:0 1px 6px rgba(44,62,80,.06);
+    margin-bottom:8px;
+  }
+  .skubar label{font-size:12px;color:#475569;font-weight:500;white-space:nowrap}
+  .skubar input{
+    padding:5px 8px;
+    border:1px solid #cbd5e1;
+    border-radius:5px;
+    font-size:12px;
+    outline:none;
+    background:#fff;
+    color:#2c3e50;
+    width:120px;
+  }
+  .skubar input:focus{
+    border-color:#ea580c;
+    box-shadow:0 0 0 2px rgba(234,88,12,.12);
+  }
+
+  button{
+    border:none;border-radius:6px;
+    padding:6px 14px;font-size:12px;cursor:pointer;
+    font-weight:600;transition:all .15s;
+    white-space:nowrap;
+  }
+  button.primary{
+    background:linear-gradient(135deg,#f4511e,#d84315);
+    color:#fff;
+    box-shadow:0 3px 10px rgba(216,67,21,.45);
+    padding:8px 20px;
+    font-size:13px;
+  }
+  button.primary:hover{
+    background:linear-gradient(135deg,#d84315,#bf360c);
+    box-shadow:0 5px 14px rgba(216,67,21,.55);
+    transform:translateY(-1px);
+  }
+  button.secondary{
+    background:linear-gradient(135deg,#14b8a6,#0d9488);
+    color:#fff;
+    box-shadow:0 3px 10px rgba(13,148,136,.4);
+    padding:8px 20px;
+    font-size:13px;
+  }
+  button.secondary:hover{
+    background:linear-gradient(135deg,#0d9488,#0f766e);
+    box-shadow:0 5px 14px rgba(13,148,136,.5);
+    transform:translateY(-1px);
+  }
+  button.copy{
+    background:linear-gradient(135deg,#66bb6a,#43a047);
+    color:#fff;
+    padding:4px 12px;font-size:11px;
+    box-shadow:0 2px 6px rgba(67,160,71,.3);
+  }
+  button.copy:hover{
+    background:linear-gradient(135deg,#43a047,#2e7d32);
+    transform:translateY(-1px);
+  }
+
+  #results{background:transparent}
+  .row-label{
+    font-size:11px;color:#64748b;margin:6px 0 2px;font-weight:600;
+  }
+  .sku-title{
+    display:flex;align-items:center;gap:10px;
+    font-size:13px;font-weight:700;color:#c2410c;
+    margin:8px 0 4px;flex-wrap:wrap;
+  }
+
+  .table-wrap{
+    overflow-x:auto;
+    overflow-y:visible;
+    border-radius:6px;
+    border:1px solid #d8e2ec;
+    margin-bottom:8px;
+    background:#fff;
+  }
+  table{
+    border-collapse:collapse;
+    font-size:12px;
+    table-layout:fixed;
+    min-width:100%;
+  }
+  th,td{
+    border:1px solid #e2e8f0;
+    padding:4px 8px;
+    text-align:right;
+    white-space:nowrap;
+    overflow:visible;
+  }
+  th:first-child,td:first-child{
+    text-align:left;
+    background:linear-gradient(180deg,#e3ebf3,#d8e2ec);
+    color:#1e3a5f;font-weight:700;
+    position:sticky;left:0;z-index:2;
+    width:70px;min-width:70px;
+    font-size:11px;
+  }
+  th:not(:first-child),td:not(:first-child){
+    width:58px;min-width:58px;
+  }
+  th{
+    background:linear-gradient(180deg,#e3ebf3,#d8e2ec);
+    text-align:center;color:#1e3a5f;font-weight:700;
+    border-bottom:2px solid #b8c8d8;
+    font-size:11px;
+  }
+  tr:nth-child(even){background:#f8fafc}
+  tr:hover{background:#eef4fa}
+
+  .summary{
+    display:flex;gap:18px;flex-wrap:wrap;
+    font-size:12px;margin-bottom:8px;
+    padding:6px 12px;
+    background:#fff;
+    border-radius:6px;
+    border:1px solid #d8e2ec;
+    box-shadow:0 1px 4px rgba(44,62,80,.05);
+  }
+  .summary span{color:#c2410c;font-weight:700}
+
+  .toast{
+    position:fixed;top:16px;left:50%;transform:translateX(-50%);
+    background:linear-gradient(135deg,#43a047,#2e7d32);
+    color:#fff;padding:8px 18px;border-radius:6px;font-size:12px;
+    z-index:9999;opacity:0;transition:opacity .3s;pointer-events:none;
+    box-shadow:0 4px 12px rgba(46,125,50,.35);
+  }
+  .toast.show{opacity:1}
+</style>
+</head>
+<body>
+
+<div id="toast" class="toast">已复制</div>
+
+<h1>无忧物流-标准 区域定价工具 v14</h1>
+<span class="sub">按商家实际运费计算。重量单位：g。表格可左右滑。</span>
+
+<div class="topbar">
+  <label>成本</label><input id="cost" type="number" value="500" step="0.01" class="wide">
+  <label>重量g</label><input id="weight" type="number" value="100" step="1">
+  <label>长cm</label><input id="length" type="number" value="10" step="1">
+  <label>宽cm</label><input id="width" type="number" value="10" step="1">
+  <label>高cm</label><input id="height" type="number" value="10" step="1">
+  <label>利润率%</label><input id="profit" type="number" value="17" step="0.01">
+  <label>佣金%</label><input id="commission" type="number" value="11" step="0.01">
+  <label>汇率</label><input id="rate" type="number" value="6.7" step="0.01">
+  <label>税率%</label><input id="taxRate" type="number" value="0" step="0.01">
+  <label>货物</label>
+  <select id="goodsType">
+    <option value="pu">普货</option>
+    <option value="fei">非普货</option>
+  </select>
+  <label>抛重</label>
+  <select id="divisor">
+    <option value="8000">8000</option>
+    <option value="6000">6000</option>
+    <option value="5000">5000</option>
+  </select>
+  <label style="display:flex;align-items:center;gap:4px;cursor:pointer">
+    <input id="useVolumetric" type="checkbox" style="width:auto"> 算抛重
+  </label>
+</div>
+
+<div class="skubar">
+  <label>SKU编码</label><input id="skuCode" type="text" placeholder="SKU-1">
+  <button class="primary" onclick="calculateAll()">批量计算</button>
+  <button class="secondary" onclick="exportCSV()">导出 CSV</button>
+</div>
+
+<div class="summary">
+  <div>有效国家：<span id="countryCount">0</span></div>
+  <div>销售价均价：<span id="avgPrice">-</span> USD</div>
+  <div>平均利润率：<span id="avgProfitRate">-</span> %</div>
+</div>
+
+<div id="results"></div>
+
+<script>
+/* ========== 数据：无忧物流-标准 普货小包，只保留 114 个国家 ========== */
+var RATES = [
+  {code:"RU",name:"俄罗斯",pu:[{maxG:150,p:81,r:17},{maxG:300,p:81,r:19},{maxG:2000,p:83,r:20}],fei:[{maxG:150,p:86.5,r:17},{maxG:300,p:86.5,r:19},{maxG:2000,p:90,r:20}]},
+  {code:"ES",name:"西班牙",pu:[{maxG:150,p:64.67,r:19.26},{maxG:300,p:64.67,r:19.26},{maxG:2000,p:64.67,r:19.26}],fei:[{maxG:2000,p:85.41,r:19.26}]},
+  {code:"FR",name:"法国",pu:[{maxG:150,p:91.74,r:17.02},{maxG:300,p:91.74,r:17.02},{maxG:2000,p:70.01,r:22.02}],fei:[{maxG:2000,p:94.15,r:17.02}]},
+  {code:"BR",name:"巴西",pu:[{maxG:200,p:68.26,r:29.01},{maxG:300,p:81.92,r:32.01},{maxG:500,p:81.92,r:34.01},{maxG:2000,p:89.36,r:35.01}],fei:[{maxG:200,p:90.6,r:29.01},{maxG:300,p:90.6,r:32.01},{maxG:500,p:90.6,r:34.01},{maxG:2000,p:90.6,r:35.01}]},
+  {code:"US",name:"美国",pu:[{maxG:200,p:72.45,r:30.45},{maxG:400,p:72.45,r:31.25},{maxG:700,p:72.7,r:32.95},{maxG:2000,p:71.13,r:38.15}],fei:[{maxG:200,p:77.04,r:31.65},{maxG:400,p:77.04,r:32.55},{maxG:700,p:77.28,r:34.45},{maxG:2000,p:75.71,r:40.85}]},
+  {code:"KR",name:"韩国",pu:[{maxG:605,p:29.68,r:15.9},{maxG:2000,p:14.29,r:22.4}],fei:[{maxG:605,p:29.68,r:15.9},{maxG:2000,p:14.29,r:22.4}]},
+  {code:"SA",name:"沙特阿拉伯",pu:[{maxG:150,p:197.6,r:52.43},{maxG:300,p:197.6,r:52.43},{maxG:2000,p:197.6,r:52.43}],fei:[{maxG:2000,p:234.38,r:52.43}]},
+  {code:"IL",name:"以色列",pu:[{maxG:150,p:161.67,r:19.4},{maxG:300,p:161.67,r:19.4},{maxG:2000,p:161.67,r:21.4}],fei:[{maxG:150,p:161.67,r:19.4},{maxG:300,p:161.67,r:19.4},{maxG:2000,p:161.67,r:21.4}]},
+  {code:"MX",name:"墨西哥",pu:[{maxG:50,p:124.2,r:20.95},{maxG:150,p:76.88,r:22.95},{maxG:300,p:70.97,r:24.95},{maxG:2000,p:70.97,r:24.95}],fei:[{maxG:50,p:124.2,r:20.95},{maxG:150,p:76.88,r:22.95},{maxG:300,p:70.97,r:24.95},{maxG:2000,p:70.97,r:24.95}]},
+  {code:"CL",name:"智利",pu:[{maxG:150,p:131.56,r:20.95},{maxG:300,p:100.24,r:25.95},{maxG:500,p:100.24,r:25.95},{maxG:2000,p:106.5,r:30.95}],fei:[{maxG:150,p:131.56,r:20.95},{maxG:300,p:100.24,r:25.95},{maxG:500,p:100.24,r:25.95},{maxG:2000,p:106.5,r:30.95}]},
+  {code:"UA",name:"乌克兰",pu:[{maxG:2000,p:118.98,r:7.4}],fei:[{maxG:200,p:0,r:27.2},{maxG:2000,p:132.33,r:7.4}]},
+  {code:"PL",name:"波兰",pu:[{maxG:150,p:72.15,r:11.62},{maxG:300,p:72.15,r:12.62},{maxG:2000,p:72.15,r:13.12}],fei:[{maxG:150,p:81.93,r:11.62},{maxG:300,p:81.93,r:12.62},{maxG:2000,p:81.93,r:13.12}]},
+  {code:"BY",name:"白俄罗斯",pu:[{maxG:150,p:136,r:21},{maxG:300,p:136,r:21},{maxG:2000,p:136,r:21}],fei:[{maxG:2000,p:165,r:25}]},
+  {code:"DE",name:"德国",pu:[{maxG:150,p:70.44,r:18.85},{maxG:300,p:70.44,r:18.85},{maxG:2000,p:70.44,r:18.85}],fei:[{maxG:2000,p:88.65,r:21.85}]},
+  {code:"GB",name:"英国",pu:[{maxG:150,p:67.76,r:15.9},{maxG:300,p:67.76,r:15.9},{maxG:2000,p:67.76,r:15.9}],fei:[{maxG:2000,p:83.3,r:17}]},
+  {code:"NL",name:"荷兰",pu:[{maxG:150,p:69.03,r:24.62},{maxG:300,p:69.03,r:27.62},{maxG:2000,p:69.03,r:27.62}],fei:[{maxG:2000,p:105.42,r:26.62}]},
+  {code:"IT",name:"意大利",pu:[{maxG:150,p:63.8,r:23.4},{maxG:300,p:63.8,r:23.4},{maxG:2000,p:63.8,r:23.4}],fei:[{maxG:2000,p:91.68,r:23.4}]},
+  {code:"JP",name:"日本",pu:[{maxG:150,p:64.45,r:21.2},{maxG:300,p:64.45,r:21.2},{maxG:2000,p:64.45,r:21.2}],fei:[{maxG:2000,p:64.45,r:22.2}]},
+  {code:"AU",name:"澳大利亚",pu:[{maxG:150,p:102.59,r:18.4},{maxG:300,p:94.61,r:18.4},{maxG:2000,p:89.52,r:18.4}],fei:[{maxG:2000,p:85.08,r:29.09}]},
+  {code:"CA",name:"加拿大",pu:[{maxG:150,p:122.44,r:27.6},{maxG:300,p:122.44,r:27.6},{maxG:2000,p:122.44,r:27.6}],fei:[{maxG:2000,p:110.59,r:32.3}]},
+  {code:"ID",name:"印度尼西亚",pu:[{maxG:150,p:54.6,r:16.8},{maxG:300,p:54.6,r:16.8},{maxG:2000,p:54.6,r:16.8}],fei:[{maxG:2000,p:54.6,r:17.8}]},
+  {code:"MY",name:"马来西亚",pu:[{maxG:150,p:18,r:8},{maxG:500,p:23,r:8},{maxG:2000,p:25,r:8}],fei:[{maxG:150,p:18,r:9},{maxG:500,p:23,r:9},{maxG:2000,p:25,r:9}]},
+  {code:"PH",name:"菲律宾",pu:[{maxG:150,p:87.9,r:14.09},{maxG:300,p:87.9,r:14.09},{maxG:2000,p:87.9,r:14.09}],fei:[{maxG:2000,p:87.9,r:14.09}]},
+  {code:"VN",name:"越南",pu:[{maxG:150,p:98.44,r:13},{maxG:300,p:98.44,r:13},{maxG:2000,p:98.44,r:13}],fei:[{maxG:2000,p:98.44,r:13}]},
+  {code:"SG",name:"新加坡",pu:[{maxG:150,p:70.7,r:8.1},{maxG:300,p:70.7,r:8.1},{maxG:2000,p:70.7,r:8.1}],fei:[{maxG:2000,p:70.7,r:9.1}]},
+  {code:"TH",name:"泰国",pu:[{maxG:150,p:40,r:14.4},{maxG:500,p:40,r:14.4},{maxG:2000,p:42,r:14.4}],fei:[{maxG:150,p:40,r:15.4},{maxG:500,p:40,r:15.4},{maxG:2000,p:42,r:15.4}]},
+  {code:"AE",name:"阿拉伯联合酋长国",pu:[{maxG:150,p:254.97,r:15.85},{maxG:300,p:254.97,r:15.85},{maxG:2000,p:254.97,r:15.85}],fei:[{maxG:2000,p:256.63,r:18.7}]},
+  {code:"TR",name:"土耳其",pu:[{maxG:150,p:100,r:20.4},{maxG:300,p:100,r:20.4},{maxG:2000,p:100,r:20.4}],fei:[{maxG:2000,p:100,r:21.4}]},
+  {code:"PT",name:"葡萄牙",pu:[{maxG:150,p:85.35,r:20.95},{maxG:300,p:85.35,r:20.95},{maxG:2000,p:85.35,r:20.95}],fei:[{maxG:2000,p:111.71,r:20.95}]},
+  {code:"BE",name:"比利时",pu:[{maxG:150,p:75.25,r:23.4},{maxG:300,p:75.25,r:23.4},{maxG:2000,p:75.25,r:23.4}],fei:[{maxG:2000,p:98.15,r:23.4}]},
+  {code:"CO",name:"哥伦比亚",pu:[{maxG:150,p:163.22,r:18.54},{maxG:300,p:163.22,r:18.54},{maxG:2000,p:163.22,r:18.54}],fei:[{maxG:2000,p:187.28,r:18.54}]},
+  {code:"MA",name:"摩洛哥",pu:[{maxG:150,p:140.9,r:17},{maxG:300,p:140.9,r:17},{maxG:2000,p:140.9,r:17}],fei:[{maxG:2000,p:140.9,r:18}]},
+  {code:"CH",name:"瑞士",pu:[{maxG:150,p:126.82,r:21.95},{maxG:300,p:126.82,r:21.95},{maxG:450,p:126.82,r:21.95},{maxG:2000,p:114.26,r:21.95}],fei:[{maxG:2000,p:145.1,r:21.95}]},
+  {code:"CZ",name:"捷克",pu:[{maxG:150,p:74,r:20.95},{maxG:300,p:74,r:20.95},{maxG:2000,p:74,r:20.95}],fei:[{maxG:2000,p:91,r:21.95}]},
+  {code:"NZ",name:"新西兰",pu:[{maxG:150,p:103.96,r:31.4},{maxG:300,p:103.96,r:31.4},{maxG:2000,p:103.96,r:31.4}],fei:[{maxG:2000,p:103.96,r:32.4}]},
+  {code:"LT",name:"立陶宛",pu:[{maxG:150,p:109.98,r:24.4},{maxG:300,p:109.98,r:24.4},{maxG:2000,p:109.98,r:24.4}],fei:[{maxG:2000,p:109.98,r:25.4}]},
+  {code:"LV",name:"拉脱维亚",pu:[{maxG:150,p:79,r:23},{maxG:300,p:79,r:23},{maxG:2000,p:79,r:23}],fei:[{maxG:2000,p:94,r:24}]},
+  {code:"SK",name:"斯洛伐克",pu:[{maxG:150,p:89.99,r:19.17},{maxG:300,p:89.99,r:19.17},{maxG:2000,p:89.99,r:19.17}],fei:[{maxG:2000,p:89.99,r:20.24}]},
+  {code:"NO",name:"挪威",pu:[{maxG:150,p:106.5,r:25.45},{maxG:300,p:106.5,r:25.45},{maxG:2000,p:106.5,r:25.45}],fei:[{maxG:2000,p:106.5,r:26.45}]},
+  {code:"HU",name:"匈牙利",pu:[{maxG:150,p:84.62,r:21.35},{maxG:300,p:84.62,r:21.35},{maxG:2000,p:84.62,r:21.35}],fei:[{maxG:2000,p:84.62,r:22.35}]},
+  {code:"BG",name:"保加利亚",pu:[{maxG:150,p:131.13,r:19.45},{maxG:300,p:131.13,r:19.45},{maxG:2000,p:131.13,r:19.45}],fei:[{maxG:2000,p:92.45,r:28.86}]},
+  {code:"EE",name:"爱沙尼亚",pu:[{maxG:150,p:91,r:22},{maxG:300,p:91,r:22},{maxG:2000,p:91,r:22}],fei:[{maxG:2000,p:91,r:23}]},
+  {code:"RO",name:"罗马尼亚",pu:[{maxG:150,p:70.5,r:51.41},{maxG:300,p:70.5,r:51.41},{maxG:2000,p:70.5,r:51.41}],fei:[{maxG:2000,p:70.5,r:52.41}]},
+  {code:"PK",name:"巴基斯坦",pu:[{maxG:150,p:129.7,r:18.6},{maxG:300,p:129.7,r:18.6},{maxG:2000,p:129.7,r:18.6}],fei:[{maxG:2000,p:129.7,r:19.6}]},
+  {code:"HR",name:"克罗地亚",pu:[{maxG:150,p:85.84,r:22.04},{maxG:300,p:85.26,r:22.04},{maxG:2000,p:85.26,r:22.04}],fei:[{maxG:2000,p:86.77,r:25.87}]},
+  {code:"NG",name:"尼日利亚",pu:[{maxG:150,p:153.43,r:17.6},{maxG:300,p:153.43,r:17.6},{maxG:2000,p:153.43,r:17.6}],fei:[{maxG:2000,p:153.43,r:18.6}]},
+  {code:"IE",name:"爱尔兰",pu:[{maxG:150,p:90.9,r:22.46},{maxG:300,p:90.9,r:22.46},{maxG:2000,p:90.9,r:22.46}],fei:[{maxG:2000,p:90.9,r:23.62}]},
+  {code:"AT",name:"奥地利",pu:[{maxG:150,p:73.5,r:23.1},{maxG:300,p:73.5,r:23.1},{maxG:2000,p:73.5,r:23.1}],fei:[{maxG:2000,p:73.5,r:24.1}]},
+  {code:"GR",name:"希腊",pu:[{maxG:150,p:84.26,r:27.17},{maxG:300,p:84.26,r:27.17},{maxG:2000,p:84.26,r:27.17}],fei:[{maxG:2000,p:84.26,r:28.27}]},
+  {code:"SE",name:"瑞典",pu:[{maxG:150,p:73.8,r:19.6},{maxG:300,p:73.8,r:19.6},{maxG:2000,p:73.8,r:19.6}],fei:[{maxG:2000,p:73.8,r:20.6}]},
+  {code:"FI",name:"芬兰",pu:[{maxG:150,p:76.09,r:26.96},{maxG:300,p:68.48,r:27.18},{maxG:2000,p:68.48,r:27.18}],fei:[{maxG:2000,p:80.11,r:30.01}]},
+  {code:"DK",name:"丹麦",pu:[{maxG:150,p:71.7,r:23.8},{maxG:300,p:71.7,r:23.8},{maxG:2000,p:71.7,r:23.8}],fei:[{maxG:2000,p:71.7,r:24.8}]},
+  {code:"SI",name:"斯洛文尼亚",pu:[{maxG:150,p:122.3,r:17},{maxG:300,p:122.3,r:17},{maxG:2000,p:122.3,r:17}],fei:[{maxG:2000,p:54.7,r:40.7}]},
+  {code:"MT",name:"马耳他",pu:[{maxG:150,p:137.39,r:20.79},{maxG:300,p:137.39,r:20.79},{maxG:2000,p:137.39,r:20.79}],fei:[{maxG:2000,p:137.39,r:21.89}]},
+  {code:"LK",name:"斯里兰卡",pu:[{maxG:150,p:120.7,r:17},{maxG:300,p:120.7,r:17},{maxG:2000,p:120.7,r:17}],fei:[{maxG:2000,p:120.7,r:18}]},
+  {code:"LU",name:"卢森堡",pu:[{maxG:150,p:62.81,r:22.99},{maxG:300,p:62.81,r:22.99},{maxG:2000,p:62.81,r:22.99}],fei:[{maxG:2000,p:62.81,r:24.09}]},
+  {code:"PE",name:"秘鲁",pu:[{maxG:150,p:176.19,r:19.58},{maxG:300,p:176.19,r:19.58},{maxG:2000,p:176.19,r:19.58}],fei:[{maxG:2000,p:181.22,r:31.25}]},
+  {code:"KW",name:"科威特",pu:[{maxG:150,p:240.36,r:17.6},{maxG:300,p:240.36,r:17.6},{maxG:2000,p:240.36,r:17.6}],fei:[{maxG:2000,p:240.36,r:18.6}]},
+  {code:"QA",name:"卡塔尔",pu:[{maxG:150,p:225.74,r:17.6},{maxG:300,p:225.74,r:17.6},{maxG:2000,p:225.74,r:17.6}],fei:[{maxG:2000,p:225.74,r:18.6}]},
+  {code:"OM",name:"阿曼",pu:[{maxG:150,p:211.7,r:18.1},{maxG:300,p:211.7,r:18.1},{maxG:2000,p:211.7,r:18.1}],fei:[{maxG:2000,p:211.7,r:19.1}]},
+  {code:"BH",name:"巴林",pu:[{maxG:150,p:218.18,r:17.6},{maxG:300,p:218.18,r:17.6},{maxG:2000,p:218.18,r:17.6}],fei:[{maxG:2000,p:218.18,r:18.6}]},
+  {code:"CY",name:"塞浦路斯",pu:[{maxG:150,p:168,r:16},{maxG:300,p:168,r:16},{maxG:2000,p:168,r:16}],fei:[{maxG:2000,p:168,r:17}]},
+  {code:"ET",name:"埃塞俄比亚",pu:[{maxG:150,p:168.3,r:17},{maxG:300,p:168.3,r:17},{maxG:2000,p:168.3,r:17}],fei:null},
+  {code:"UG",name:"乌干达",pu:[{maxG:150,p:190,r:18},{maxG:300,p:190,r:18},{maxG:2000,p:190,r:18}],fei:[{maxG:2000,p:190,r:19}]},
+  {code:"ZA",name:"南非",pu:[{maxG:150,p:138.9,r:29.3},{maxG:300,p:138.9,r:29.3},{maxG:2000,p:138.9,r:29.3}],fei:[{maxG:2000,p:138.9,r:30.3}]},
+  {code:"KE",name:"肯尼亚",pu:[{maxG:150,p:153.4,r:17},{maxG:300,p:153.4,r:17},{maxG:2000,p:153.4,r:17}],fei:[{maxG:2000,p:153.4,r:18}]},
+  {code:"GH",name:"加纳",pu:[{maxG:150,p:171.5,r:17},{maxG:300,p:171.5,r:17},{maxG:2000,p:171.5,r:17}],fei:[{maxG:2000,p:171.5,r:18}]},
+  {code:"DZ",name:"阿尔及利亚",pu:[{maxG:150,p:193.26,r:17},{maxG:300,p:193.26,r:17},{maxG:2000,p:193.26,r:17}],fei:[{maxG:2000,p:193.26,r:18}]},
+  {code:"RS",name:"塞尔维亚",pu:[{maxG:150,p:150,r:18},{maxG:300,p:150,r:18},{maxG:2000,p:150,r:18}],fei:[{maxG:2000,p:150,r:19}]},
+  {code:"RE",name:"留尼汪岛",pu:[{maxG:150,p:205.1,r:17},{maxG:300,p:205.1,r:17},{maxG:2000,p:205.1,r:17}],fei:[{maxG:2000,p:205.1,r:18}]},
+  {code:"AO",name:"安哥拉",pu:[{maxG:150,p:176.7,r:17},{maxG:300,p:176.7,r:17},{maxG:2000,p:176.7,r:17}],fei:[{maxG:2000,p:176.7,r:18}]},
+  {code:"IS",name:"冰岛",pu:[{maxG:150,p:190.08,r:18.7},{maxG:300,p:190.08,r:18.7},{maxG:2000,p:190.08,r:18.7}],fei:[{maxG:2000,p:190.08,r:19.8}]},
+  {code:"AL",name:"阿尔巴尼亚",pu:[{maxG:150,p:209.66,r:18.7},{maxG:300,p:209.66,r:18.7},{maxG:2000,p:209.66,r:18.7}],fei:[{maxG:2000,p:209.66,r:19.8}]},
+  {code:"MU",name:"毛里求斯",pu:[{maxG:150,p:205.1,r:17},{maxG:300,p:205.1,r:17},{maxG:2000,p:205.1,r:17}],fei:[{maxG:2000,p:205.1,r:18}]},
+  {code:"MZ",name:"莫桑比克",pu:[{maxG:150,p:171.5,r:17},{maxG:300,p:171.5,r:17},{maxG:2000,p:171.5,r:17}],fei:[{maxG:2000,p:171.5,r:18}]},
+  {code:"TZ",name:"坦桑尼亚",pu:[{maxG:150,p:168.3,r:17},{maxG:300,p:168.3,r:17},{maxG:2000,p:168.3,r:17}],fei:[{maxG:2000,p:168.3,r:18}]},
+  {code:"SV",name:"萨尔瓦多",pu:[{maxG:150,p:217.1,r:18},{maxG:300,p:217.1,r:18},{maxG:2000,p:217.1,r:18}],fei:[{maxG:2000,p:217.1,r:19}]},
+  {code:"MV",name:"马尔代夫",pu:[{maxG:150,p:150,r:18},{maxG:300,p:150,r:18},{maxG:2000,p:150,r:18}],fei:null},
+  {code:"CV",name:"佛得角",pu:[{maxG:150,p:205.1,r:17},{maxG:300,p:205.1,r:17},{maxG:2000,p:205.1,r:17}],fei:[{maxG:2000,p:205.1,r:18}]},
+  {code:"MK",name:"马其顿王国",pu:[{maxG:150,p:184.25,r:18.7},{maxG:300,p:184.25,r:18.7},{maxG:2000,p:184.25,r:18.7}],fei:[{maxG:2000,p:184.25,r:19.8}]},
+  {code:"AR",name:"阿根廷",pu:[{maxG:150,p:191,r:19.1},{maxG:300,p:191,r:19.1},{maxG:2000,p:191,r:19.1}],fei:[{maxG:2000,p:191,r:20.1}]},
+  {code:"MQ",name:"马提尼克岛",pu:[{maxG:150,p:205.1,r:17},{maxG:300,p:205.1,r:17},{maxG:2000,p:205.1,r:17}],fei:[{maxG:2000,p:205.1,r:18}]},
+  {code:"GP",name:"法属瓜德罗普岛",pu:[{maxG:150,p:205.1,r:17},{maxG:300,p:205.1,r:17},{maxG:2000,p:205.1,r:17}],fei:[{maxG:2000,p:205.1,r:18}]},
+  {code:"CR",name:"哥斯达黎加",pu:[{maxG:150,p:217.1,r:18},{maxG:300,p:217.1,r:18},{maxG:2000,p:217.1,r:18}],fei:[{maxG:2000,p:217.1,r:19}]},
+  {code:"GF",name:"法属圭亚那",pu:[{maxG:150,p:205.1,r:17},{maxG:300,p:205.1,r:17},{maxG:2000,p:205.1,r:17}],fei:[{maxG:2000,p:205.1,r:18}]},
+  {code:"EG",name:"阿拉伯埃及共和国",pu:[{maxG:150,p:187.2,r:17},{maxG:300,p:187.2,r:17},{maxG:2000,p:187.2,r:17}],fei:null},
+  {code:"KH",name:"柬埔寨",pu:[{maxG:150,p:62.6,r:17.6},{maxG:300,p:62.6,r:17.6},{maxG:2000,p:62.6,r:17.6}],fei:[{maxG:2000,p:62.6,r:18.6}]},
+  {code:"BD",name:"孟加拉国",pu:[{maxG:150,p:175,r:18},{maxG:300,p:175,r:18},{maxG:2000,p:175,r:18}],fei:null},
+  {code:"SC",name:"塞舌尔",pu:[{maxG:150,p:162,r:17},{maxG:300,p:162,r:17},{maxG:2000,p:162,r:17}],fei:[{maxG:2000,p:162,r:18}]},
+  {code:"NA",name:"纳米比亚",pu:[{maxG:150,p:182,r:17},{maxG:300,p:182,r:17},{maxG:2000,p:182,r:17}],fei:[{maxG:2000,p:182,r:18}]},
+  {code:"ME",name:"蒙特内哥罗",pu:[{maxG:150,p:190,r:18},{maxG:300,p:190,r:18},{maxG:2000,p:190,r:18}],fei:null},
+  {code:"DO",name:"多米尼加共和国",pu:[{maxG:150,p:205.1,r:17},{maxG:300,p:205.1,r:17},{maxG:2000,p:205.1,r:17}],fei:[{maxG:2000,p:205.1,r:18}]},
+  {code:"BO",name:"玻利维亚",pu:[{maxG:150,p:217.1,r:18},{maxG:300,p:217.1,r:18},{maxG:2000,p:217.1,r:18}],fei:[{maxG:2000,p:217.1,r:19}]},
+  {code:"CI",name:"科特迪瓦",pu:[{maxG:150,p:205.1,r:17},{maxG:300,p:205.1,r:17},{maxG:2000,p:205.1,r:17}],fei:[{maxG:2000,p:205.1,r:18}]},
+  {code:"BF",name:"布基纳法索",pu:[{maxG:150,p:205.1,r:17},{maxG:300,p:205.1,r:17},{maxG:2000,p:205.1,r:17}],fei:[{maxG:2000,p:205.1,r:18}]},
+  {code:"PR",name:"波多黎各",pu:[{maxG:150,p:173.3,r:42.7},{maxG:300,p:173.3,r:42.7},{maxG:2000,p:173.3,r:42.7}],fei:[{maxG:2000,p:173.3,r:43.7}]},
+  {code:"TN",name:"突尼斯",pu:[{maxG:150,p:194.6,r:17},{maxG:300,p:194.6,r:17},{maxG:2000,p:194.6,r:17}],fei:[{maxG:2000,p:194.6,r:18}]},
+  {code:"PY",name:"巴拉圭",pu:[{maxG:150,p:205.1,r:17},{maxG:300,p:205.1,r:17},{maxG:2000,p:205.1,r:17}],fei:[{maxG:2000,p:205.1,r:18}]},
+  {code:"UY",name:"乌拉圭",pu:[{maxG:150,p:217.1,r:18},{maxG:300,p:217.1,r:18},{maxG:2000,p:217.1,r:18}],fei:[{maxG:2000,p:217.1,r:19}]},
+  {code:"NI",name:"尼加拉瓜",pu:[{maxG:150,p:205.1,r:17},{maxG:300,p:205.1,r:17},{maxG:2000,p:205.1,r:17}],fei:[{maxG:2000,p:205.1,r:18}]},
+  {code:"ZM",name:"赞比亚",pu:[{maxG:150,p:168.3,r:17},{maxG:300,p:168.3,r:17},{maxG:2000,p:168.3,r:17}],fei:[{maxG:2000,p:168.3,r:18}]},
+  {code:"BN",name:"文莱",pu:[{maxG:150,p:148.3,r:17.6},{maxG:300,p:148.3,r:17.6},{maxG:2000,p:148.3,r:17.6}],fei:[{maxG:2000,p:148.3,r:18.6}]},
+  {code:"MG",name:"马达加斯加",pu:[{maxG:150,p:182,r:17},{maxG:300,p:182,r:17},{maxG:2000,p:182,r:17}],fei:[{maxG:2000,p:153.4,r:18}]},
+  {code:"BW",name:"博茨瓦纳",pu:[{maxG:150,p:175,r:25},{maxG:300,p:175,r:25},{maxG:2000,p:175,r:25}],fei:[{maxG:2000,p:175,r:26}]},
+  {code:"RW",name:"卢旺达",pu:[{maxG:150,p:205,r:18},{maxG:300,p:205,r:18},{maxG:2000,p:205,r:18}],fei:[{maxG:2000,p:205,r:19}]},
+  {code:"SN",name:"塞内加尔",pu:[{maxG:150,p:205,r:18},{maxG:300,p:205,r:18},{maxG:2000,p:205,r:18}],fei:[{maxG:2000,p:205,r:19}]},
+  {code:"ZW",name:"津巴布韦",pu:[{maxG:150,p:168.3,r:17},{maxG:300,p:168.3,r:17},{maxG:2000,p:168.3,r:17}],fei:[{maxG:2000,p:168.3,r:18}]},
+  {code:"MW",name:"马拉维",pu:[{maxG:150,p:206.1,r:17},{maxG:300,p:206.1,r:17},{maxG:2000,p:206.1,r:17}],fei:[{maxG:2000,p:206.1,r:18}]},
+  {code:"GN",name:"几内亚",pu:[{maxG:150,p:205.1,r:17},{maxG:300,p:205.1,r:17},{maxG:2000,p:205.1,r:17}],fei:[{maxG:2000,p:205.1,r:18}]},
+  {code:"TG",name:"多哥",pu:[{maxG:150,p:208.2,r:17},{maxG:300,p:208.2,r:17},{maxG:2000,p:208.2,r:17}],fei:[{maxG:2000,p:208.2,r:18}]},
+  {code:"KI",name:"基里巴斯",pu:[{maxG:150,p:172.4,r:17},{maxG:300,p:172.4,r:17},{maxG:2000,p:172.4,r:17}],fei:[{maxG:2000,p:172.4,r:18}]},
+  {code:"GQ",name:"赤道几内亚",pu:[{maxG:150,p:205.1,r:17},{maxG:300,p:205.1,r:17},{maxG:2000,p:205.1,r:17}],fei:[{maxG:2000,p:205.1,r:18}]},
+  {code:"CM",name:"喀麦隆",pu:[{maxG:150,p:175,r:25},{maxG:300,p:175,r:25},{maxG:2000,p:175,r:25}],fei:[{maxG:2000,p:175,r:26}]},
+  {code:"MN",name:"蒙古",pu:[{maxG:150,p:149.38,r:0.65},{maxG:300,p:149.38,r:0.65},{maxG:2000,p:149.38,r:0.65}],fei:[{maxG:2000,p:149.38,r:0.65}]}
+];
+
+/* ========== 逻辑区 ========== */
+var lastResults = [];
+
+function showToast(msg){
+  var t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(function(){t.classList.remove('show');}, 1500);
+}
+
+function getGlobalInputs(){
+  return {
+    cost: parseFloat(document.getElementById('cost').value)||0,
+    weight: (parseFloat(document.getElementById('weight').value)||0)/1000,
+    length: parseFloat(document.getElementById('length').value)||0,
+    width: parseFloat(document.getElementById('width').value)||0,
+    height: parseFloat(document.getElementById('height').value)||0,
+    rate: parseFloat(document.getElementById('rate').value)||6.7,
+    commission: (parseFloat(document.getElementById('commission').value)||0)/100,
+    profit: (parseFloat(document.getElementById('profit').value)||0)/100,
+    taxRate: (parseFloat(document.getElementById('taxRate').value)||0)/100,
+    goodsType: document.getElementById('goodsType').value,
+    divisor: parseFloat(document.getElementById('divisor').value)||8000,
+    useVolumetric: document.getElementById('useVolumetric').checked
+  };
+}
+
+function getSkuCode(){
+  return document.getElementById('skuCode').value || 'SKU-1';
+}
+
+function calcBillingWeight(g){
+  var actual = g.weight;
+  if(!g.useVolumetric) return actual;
+  var L = Math.round(g.length);
+  var W = Math.round(g.width);
+  var H = Math.round(g.height);
+  var vol = (L*W*H)/g.divisor;
+  return Math.max(actual, vol);
+}
+
+function calcLogistics(country, billingKg, goodsType){
+  var g = billingKg*1000;
+  if(billingKg >= 2) return {fee:null, type:'超2kg'};
+  var segs = goodsType==='pu' ? country.pu : country.fei;
+  if(!segs || !segs.length) return {fee:null, type:'非普货暂无'};
+  var seg = segs[segs.length-1];
+  for(var i=0;i<segs.length;i++){
+    if(g<=segs[i].maxG){seg=segs[i];break;}
+  }
+  return {fee: seg.p*billingKg + seg.r, type:'小包'};
+}
+
+function calcSalePrice(cost, fee, commission, profit, rate){
+  if(fee===null) return null;
+  var denom = 1 - commission - profit;
+  if(denom<=0) return null;
+  return (cost+fee)/denom/rate;
+}
+
+function calculateAll(){
+  var g = getGlobalInputs();
+  var skuCode = getSkuCode();
+  var resultsDiv = document.getElementById('results');
+  resultsDiv.innerHTML = '';
+  lastResults = [];
+
+  var billingKg = calcBillingWeight(g);
+  var rows = [];
+  var prices = [];
+
+  RATES.forEach(function(c){
+    var log = calcLogistics(c, billingKg, g.goodsType);
+    var saleUsd = calcSalePrice(g.cost, log.fee, g.commission, g.profit, g.rate);
+    var taxUsd = saleUsd===null ? null : saleUsd*(1+g.taxRate);
+    var profitUsd = saleUsd===null ? null : saleUsd - g.cost/g.rate - (log.fee||0)/g.rate - saleUsd*g.commission;
+    var row = {
+      sku: skuCode, name: c.name, code: c.code,
+      billingKg: billingKg.toFixed(3),
+      fee: log.fee===null?'暂无':log.fee.toFixed(2),
+      saleUsd: saleUsd===null?'暂无':saleUsd.toFixed(2),
+      taxUsd: taxUsd===null?'暂无':taxUsd.toFixed(2),
+      profitUsd: profitUsd===null?'暂无':profitUsd.toFixed(2),
+      type: log.type
+    };
+    rows.push(row);
+    if(saleUsd!==null) prices.push(saleUsd);
+  });
+
+  var avg = prices.length ? prices.reduce(function(a,b){return a+b;},0)/prices.length : 0;
+  var profitRates = [];
+  rows.forEach(function(r){
+    if(r.saleUsd!=='暂无'){
+      var s = parseFloat(r.saleUsd);
+      var p = parseFloat(r.profitUsd);
+      if(s>0) profitRates.push(p/s);
+    }
+  });
+  var avgProfitRate = profitRates.length ? profitRates.reduce(function(a,b){return a+b;},0)/profitRates.length : 0;
+
+  rows.forEach(function(r){
+    if(r.saleUsd!=='暂无'){
+      var s = parseFloat(r.saleUsd);
+      r.adjust = ((s/avg-1)*100).toFixed(2)+'%';
+      r.diff = (s-avg).toFixed(2);
+    }else{
+      r.adjust = '暂无';
+      r.diff = '暂无';
+    }
+    lastResults.push(r);
+  });
+
+  document.getElementById('countryCount').textContent = prices.length;
+  document.getElementById('avgPrice').textContent = avg.toFixed(2);
+  document.getElementById('avgProfitRate').textContent = (avgProfitRate*100).toFixed(2);
+
+  var title = document.createElement('div');
+  title.className = 'sku-title';
+  title.innerHTML = 'SKU：' + skuCode
+    + ' <button class="copy" onclick="copySkuPrices(\''+skuCode+'\')">复制售价</button>';
+  resultsDiv.appendChild(title);
+
+  var half = Math.ceil(rows.length / 2);
+  renderTransposedTable(rows.slice(0, half), resultsDiv, '第一行（'+half+' 国）');
+  renderTransposedTable(rows.slice(half), resultsDiv, '第二行（'+(rows.length-half)+' 国）');
+}
+
+function renderTransposedTable(rows, container, label){
+  if(!rows.length) return;
+  var labelDiv = document.createElement('div');
+  labelDiv.className = 'row-label';
+  labelDiv.textContent = label;
+  container.appendChild(labelDiv);
+
+  var wrap = document.createElement('div');
+  wrap.className = 'table-wrap';
+  var table = document.createElement('table');
+
+  var thead = '<thead><tr><th>项目</th>';
+  rows.forEach(function(r){ thead += '<th>'+r.name+'</th>'; });
+  thead += '</tr></thead>';
+
+  var tbody = '<tbody>';
+  tbody += '<tr><td>运费</td>' + rows.map(function(r){return '<td>'+r.fee+'</td>';}).join('') + '</tr>';
+  tbody += '<tr><td>销售价</td>' + rows.map(function(r){return '<td>'+r.saleUsd+'</td>';}).join('') + '</tr>';
+  tbody += '<tr><td>利润</td>' + rows.map(function(r){return '<td>'+r.profitUsd+'</td>';}).join('') + '</tr>';
+  tbody += '<tr><td>调整</td>' + rows.map(function(r){return '<td>'+r.adjust+'</td>';}).join('') + '</tr>';
+  tbody += '<tr><td>差价</td>' + rows.map(function(r){return '<td>'+r.diff+'</td>';}).join('') + '</tr>';
+  tbody += '</tbody>';
+
+  table.innerHTML = thead + tbody;
+  wrap.appendChild(table);
+  container.appendChild(wrap);
+}
+
+function copySkuPrices(skuCode){
+  var rows = lastResults.filter(function(r){return r.sku===skuCode;});
+  if(!rows.length){showToast('无数据');return;}
+  var lines = ['国家\t销售价(USD)'];
+  rows.forEach(function(r){
+    lines.push(r.name + '\t' + r.saleUsd);
+  });
+  var text = lines.join('\n');
+  copyText(text, '已复制 ' + rows.length + ' 个国家的售价');
+}
+
+function copyText(text, msg){
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(text).then(function(){
+      showToast(msg || '已复制');
+    }).catch(function(){
+      fallbackCopy(text, msg);
+    });
+  }else{
+    fallbackCopy(text, msg);
+  }
+}
+
+function fallbackCopy(text, msg){
+  var ta = document.createElement('textarea');
+  ta.value = text;
+  ta.style.position = 'fixed';
+  ta.style.opacity = '0';
+  document.body.appendChild(ta);
+  ta.select();
+  try{
+    document.execCommand('copy');
+    showToast(msg || '已复制');
+  }catch(e){
+    showToast('复制失败，请手动复制');
+  }
+  document.body.removeChild(ta);
+}
+
+function exportCSV(){
+  if(!lastResults.length){alert('请先点击“批量计算”');return;}
+  var header = ['SKU','国家','Code','计费重量(kg)','运费(CNY)','销售价(USD)','含税价(USD)','利润(USD)','调整比例','差价(USD)','类型'];
+  var lines = [header.join(',')];
+  lastResults.forEach(function(r){
+    lines.push([r.sku,r.name,r.code,r.billingKg,r.fee,r.saleUsd,r.taxUsd,r.profitUsd,r.adjust,r.diff,r.type].join(','));
+  });
+  var csv = '\ufeff'+lines.join('\n');
+  var blob = new Blob([csv],{type:'text/csv;charset=utf-8;'});
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url; a.download = 'SKU区域定价.csv'; a.click();
+  URL.revokeObjectURL(url);
+}
+
+window.addEventListener('load', function(){
+  calculateAll();
+});
+</script>
+</body>
+</html>
