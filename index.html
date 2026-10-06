@@ -96,16 +96,25 @@
 
   .topbar{display:flex;flex-wrap:wrap;align-items:center;gap:10px;}
   .topbar label{font-size:12px;color:rgba(196,181,253,.7);font-weight:500;white-space:nowrap;}
-  .topbar input,.topbar select{padding:7px 10px;background:rgba(255,255,255,.04);border:1px solid rgba(168,85,247,.2);border-radius:10px;font-size:12px;color:#fff;outline:none;transition:all .25s;width:80px;}
-  .topbar input.wide{width:100px;}
+  .topbar input,.topbar select{padding:7px 10px;background:rgba(255,255,255,.04);border:1px solid rgba(168,85,247,.2);border-radius:10px;font-size:12px;color:#fff;outline:none;transition:all .25s;width:90px;}
+  .topbar input.wide{width:110px;}
   .topbar input:focus,.topbar select:focus{border-color:rgba(217,70,239,.6);box-shadow:0 0 0 3px rgba(168,85,247,.15);}
   .topbar select option{background:#1a0b3a;color:#fff;}
 
+  /* SKU 行：每个字段带中文标签 */
   .sku-list{display:flex;flex-direction:column;gap:10px;}
-  .sku-row{display:grid;grid-template-columns:1.2fr .8fr .8fr .8fr .8fr .8fr .8fr .8fr .8fr auto;gap:8px;align-items:center;padding:10px;background:rgba(168,85,247,.06);border:1px solid rgba(168,85,247,.15);border-radius:12px;}
-  .sku-row input,.sku-row select{padding:6px 8px;background:rgba(255,255,255,.05);border:1px solid rgba(168,85,247,.2);border-radius:8px;font-size:12px;color:#fff;outline:none;width:100%;}
-  .sku-row input:focus,.sku-row select:focus{border-color:rgba(217,70,239,.6);box-shadow:0 0 0 2px rgba(168,85,247,.15);}
-  .sku-row .del{background:rgba(239,68,68,.15);color:#fca5a5;border:1px solid rgba(239,68,68,.3);border-radius:8px;padding:6px 10px;font-size:12px;cursor:pointer;}
+  .sku-row{
+    display:grid;
+    grid-template-columns:1.2fr .8fr .8fr .8fr .8fr .8fr .8fr auto;
+    gap:10px;align-items:end;
+    padding:12px;background:rgba(168,85,247,.06);
+    border:1px solid rgba(168,85,247,.15);border-radius:12px;
+  }
+  .sku-field{display:flex;flex-direction:column;gap:4px;}
+  .sku-field label{font-size:11px;color:rgba(196,181,253,.7);font-weight:500;white-space:nowrap;}
+  .sku-field input{padding:6px 8px;background:rgba(255,255,255,.05);border:1px solid rgba(168,85,247,.2);border-radius:8px;font-size:12px;color:#fff;outline:none;width:100%;}
+  .sku-field input:focus{border-color:rgba(217,70,239,.6);box-shadow:0 0 0 2px rgba(168,85,247,.15);}
+  .sku-row .del{background:rgba(239,68,68,.15);color:#fca5a5;border:1px solid rgba(239,68,68,.3);border-radius:8px;padding:6px 10px;font-size:12px;cursor:pointer;align-self:end;}
   .sku-row .del:hover{background:rgba(239,68,68,.25);}
   .sku-hint{font-size:11px;color:rgba(196,181,253,.4);margin-top:8px;}
 
@@ -198,8 +207,14 @@
       <label>佣金%</label><input id="commission" type="number" value="11" step="0.01">
       <label>汇率</label><input id="rate" type="number" value="6.7" step="0.01">
       <label>税率%</label><input id="taxRate" type="number" value="0" step="0.01">
-      <label>货物</label>
-      <select id="goodsType"><option value="pu">普货</option><option value="fei">非普货</option></select>
+      <label>仓库操作费</label><input id="warehouseFee" type="number" value="4" step="0.01">
+      <label>货物类型</label>
+      <select id="goodsType">
+        <option value="pu">普货</option>
+        <option value="fei">带电</option>
+        <option value="pu_large">超2kg-普货</option>
+        <option value="fei_large">超2kg-带电</option>
+      </select>
       <label>抛重系数</label>
       <select id="divisor"><option value="8000">8000</option><option value="6000">6000</option><option value="5000">5000</option></select>
       <label style="display:flex;align-items:center;gap:6px;cursor:pointer"><input id="useVolumetric" type="checkbox" style="width:auto"> 算抛重</label>
@@ -209,7 +224,7 @@
   <div class="panel">
     <div class="panel-title">SKU 列表（每个 SKU 独立重量/尺寸/成本）</div>
     <div class="sku-list" id="skuList"></div>
-    <div class="sku-hint">列顺序：SKU编码 / 重量g / 长cm / 宽cm / 高cm / 成本CNY / 数量</div>
+    <div class="sku-hint">每个 SKU 独立填写：SKU编码、重量(g)、长(cm)、宽(cm)、高(cm)、成本(CNY)、数量</div>
     <div style="margin-top:12px;display:flex;gap:10px;flex-wrap:wrap;">
       <button class="secondary" onclick="addSku()">+ 添加 SKU</button>
       <button class="primary" onclick="calculateAll()">批量计算</button>
@@ -313,24 +328,7 @@ document.getElementById('fakeUser').addEventListener('keydown', function(e){if(e
 })();
 
 /* =========================================================
-   数据：无忧物流-标准
-   结构：
-   {
-     code, name,
-     small: {
-       pu:  [{minG,maxG,p,r}, ...],   // 小包普货
-       fei: [{minG,maxG,p,r}, ...]    // 小包非普货
-     },
-     large: [
-       {minG,maxG,firstG,firstFee,stepG,stepFee}, ...
-     ]
-   }
-   p = 配送服务费 RMB/KG
-   r = 挂号服务费 RMB/包裹
-   firstG = 首重克重
-   firstFee = 首重费 RMB/包裹
-   stepG = 续重步长克
-   stepFee = 续重费 RMB/stepG
+   数据：无忧物流-标准（只保留标准线路）
    ========================================================= */
 var RATES = [
   {code:"RU",name:"俄罗斯",small:{pu:[{minG:0,maxG:150,p:81,r:17},{minG:150,maxG:300,p:81,r:19},{minG:300,maxG:2000,p:83,r:20}],fei:[{minG:0,maxG:150,p:86.5,r:17},{minG:150,maxG:300,p:86.5,r:19},{minG:300,maxG:2000,p:90,r:20}]},large:[{minG:0,maxG:30000,firstG:500,firstFee:97,stepG:500,stepFee:74}]},
@@ -459,29 +457,39 @@ function showToast(msg){
   setTimeout(function(){t.classList.remove('show');}, 1500);
 }
 
+/* ========== 数字格式化 ========== */
+function fmtFee(v){
+  if(v === '暂无') return '暂无';
+  return '¥' + v;
+}
+function fmtUsd(v){
+  if(v === '暂无') return '暂无';
+  return v + ' USD';
+}
+
 /* ========== SKU 管理 ========== */
 function initSkuList(){
   document.getElementById('skuList').innerHTML = '';
   skuSeq = 0;
-  addSku({code:'SKU-1', weight:100, length:10, width:10, height:10, cost:500, qty:1});
+  addSku({code:'SKU-1', weight:100, length:10, width:10, height:10, cost:100, qty:1});
   document.getElementById('statCountry').textContent = RATES.length;
 }
 
 function addSku(preset){
   skuSeq++;
   var id = 'sku_' + skuSeq;
-  var p = preset || {code:'SKU-' + skuSeq, weight:100, length:10, width:10, height:10, cost:500, qty:1};
+  var p = preset || {code:'SKU-' + skuSeq, weight:100, length:10, width:10, height:10, cost:100, qty:1};
   var row = document.createElement('div');
   row.className = 'sku-row';
   row.id = id;
   row.innerHTML =
-    '<input class="sku-code" type="text" value="' + p.code + '" placeholder="SKU编码">' +
-    '<input class="sku-weight" type="number" value="' + p.weight + '" placeholder="重量g" title="重量g">' +
-    '<input class="sku-length" type="number" value="' + p.length + '" placeholder="长cm" title="长cm">' +
-    '<input class="sku-width" type="number" value="' + p.width + '" placeholder="宽cm" title="宽cm">' +
-    '<input class="sku-height" type="number" value="' + p.height + '" placeholder="高cm" title="高cm">' +
-    '<input class="sku-cost" type="number" value="' + p.cost + '" placeholder="成本CNY" title="成本CNY">' +
-    '<input class="sku-qty" type="number" value="' + p.qty + '" placeholder="数量" title="数量">' +
+    '<div class="sku-field"><label>SKU编码</label><input class="sku-code" type="text" value="' + p.code + '" placeholder="SKU编码"></div>' +
+    '<div class="sku-field"><label>重量(g)</label><input class="sku-weight" type="number" value="' + p.weight + '" placeholder="重量g"></div>' +
+    '<div class="sku-field"><label>长(cm)</label><input class="sku-length" type="number" value="' + p.length + '" placeholder="长cm"></div>' +
+    '<div class="sku-field"><label>宽(cm)</label><input class="sku-width" type="number" value="' + p.width + '" placeholder="宽cm"></div>' +
+    '<div class="sku-field"><label>高(cm)</label><input class="sku-height" type="number" value="' + p.height + '" placeholder="高cm"></div>' +
+    '<div class="sku-field"><label>成本(CNY)</label><input class="sku-cost" type="number" value="' + p.cost + '" placeholder="成本CNY"></div>' +
+    '<div class="sku-field"><label>数量</label><input class="sku-qty" type="number" value="' + p.qty + '" placeholder="数量"></div>' +
     '<button class="del" onclick="removeSku(\'' + id + '\')">删除</button>';
   document.getElementById('skuList').appendChild(row);
 }
@@ -515,6 +523,7 @@ function getGlobalInputs(){
     commission: (parseFloat(document.getElementById('commission').value) || 0) / 100,
     profit: (parseFloat(document.getElementById('profit').value) || 0) / 100,
     taxRate: (parseFloat(document.getElementById('taxRate').value) || 0) / 100,
+    warehouseFee: parseFloat(document.getElementById('warehouseFee').value) || 0,
     goodsType: document.getElementById('goodsType').value,
     divisor: parseFloat(document.getElementById('divisor').value) || 8000,
     useVolumetric: document.getElementById('useVolumetric').checked
@@ -522,13 +531,8 @@ function getGlobalInputs(){
 }
 
 /* ========== 计费逻辑 ========== */
-function ceilTo(v, step){
-  if(step <= 0) return v;
-  return Math.ceil(v / step) * step;
-}
-
 function calcBillingWeight(sku, g){
-  var actual = sku.weight; // g
+  var actual = sku.weight;
   if(!g.useVolumetric) return actual;
   var volG = (sku.length * sku.width * sku.height) / g.divisor * 1000;
   return Math.max(actual, volG);
@@ -579,18 +583,26 @@ function calcLarge(country, billingG){
 
 function calcLogistics(country, sku, g){
   var billingG = calcBillingWeight(sku, g);
-  if(isLargePackage(sku, billingG)){
+  var sel = g.goodsType;
+
+  var goodsBase = 'pu';
+  var forceLarge = false;
+  if(sel === 'pu')        { goodsBase = 'pu';  forceLarge = false; }
+  else if(sel === 'fei')  { goodsBase = 'fei'; forceLarge = false; }
+  else if(sel === 'pu_large')  { goodsBase = 'pu';  forceLarge = true; }
+  else if(sel === 'fei_large') { goodsBase = 'fei'; forceLarge = true; }
+
+  if(forceLarge || isLargePackage(sku, billingG)){
     return calcLarge(country, billingG);
-  }else{
-    return calcSmall(country, billingG, g.goodsType);
   }
+  return calcSmall(country, billingG, goodsBase);
 }
 
-function calcSalePrice(cost, fee, commission, profit, rate){
+function calcSalePrice(cost, fee, warehouseFee, commission, profit, rate){
   if(fee === null) return null;
   var denom = 1 - commission - profit;
   if(denom <= 0) return null;
-  return (cost + fee) / denom / rate;
+  return (cost + fee + warehouseFee) / denom / rate;
 }
 
 /* ========== 批量计算 ========== */
@@ -610,9 +622,9 @@ function calculateAll(){
 
     RATES.forEach(function(c){
       var log = calcLogistics(c, sku, g);
-      var saleUsd = calcSalePrice(sku.cost, log.fee, g.commission, g.profit, g.rate);
+      var saleUsd = calcSalePrice(sku.cost, log.fee, g.warehouseFee, g.commission, g.profit, g.rate);
       var taxUsd = saleUsd === null ? null : saleUsd * (1 + g.taxRate);
-      var profitUsd = saleUsd === null ? null : saleUsd - sku.cost/g.rate - (log.fee || 0)/g.rate - saleUsd * g.commission;
+      var profitUsd = saleUsd === null ? null : saleUsd - sku.cost/g.rate - (log.fee || 0)/g.rate - g.warehouseFee/g.rate - saleUsd * g.commission;
       var row = {
         sku: sku.code, name: c.name, code: c.code,
         weightG: sku.weight,
@@ -679,9 +691,9 @@ function renderTransposedTable(rows, container, label){
   thead += '</tr></thead>';
 
   var tbody = '<tbody>';
-  tbody += '<tr><td>运费</td>' + rows.map(function(r){return '<td>'+r.fee+'</td>';}).join('') + '</tr>';
-  tbody += '<tr><td>销售价</td>' + rows.map(function(r){return '<td>'+r.saleUsd+'</td>';}).join('') + '</tr>';
-  tbody += '<tr><td>利润</td>' + rows.map(function(r){return '<td>'+r.profitUsd+'</td>';}).join('') + '</tr>';
+  tbody += '<tr><td>运费</td>' + rows.map(function(r){return '<td>'+fmtFee(r.fee)+'</td>';}).join('') + '</tr>';
+  tbody += '<tr><td>销售价</td>' + rows.map(function(r){return '<td>'+fmtUsd(r.saleUsd)+'</td>';}).join('') + '</tr>';
+  tbody += '<tr><td>利润</td>' + rows.map(function(r){return '<td>'+fmtUsd(r.profitUsd)+'</td>';}).join('') + '</tr>';
   tbody += '<tr><td>调整</td>' + rows.map(function(r){return '<td>'+r.adjust+'</td>';}).join('') + '</tr>';
   tbody += '<tr><td>差价</td>' + rows.map(function(r){return '<td>'+r.diff+'</td>';}).join('') + '</tr>';
   tbody += '</tbody>';
