@@ -101,15 +101,8 @@
   .topbar input:focus,.topbar select:focus{border-color:rgba(217,70,239,.6);box-shadow:0 0 0 3px rgba(168,85,247,.15);}
   .topbar select option{background:#1a0b3a;color:#fff;}
 
-  /* SKU 行：每个字段带中文标签 */
   .sku-list{display:flex;flex-direction:column;gap:10px;}
-  .sku-row{
-    display:grid;
-    grid-template-columns:1.2fr .8fr .8fr .8fr .8fr .8fr .8fr auto;
-    gap:10px;align-items:end;
-    padding:12px;background:rgba(168,85,247,.06);
-    border:1px solid rgba(168,85,247,.15);border-radius:12px;
-  }
+  .sku-row{display:grid;grid-template-columns:1.2fr .8fr .8fr .8fr .8fr .8fr .8fr auto;gap:10px;align-items:end;padding:12px;background:rgba(168,85,247,.06);border:1px solid rgba(168,85,247,.15);border-radius:12px;}
   .sku-field{display:flex;flex-direction:column;gap:4px;}
   .sku-field label{font-size:11px;color:rgba(196,181,253,.7);font-weight:500;white-space:nowrap;}
   .sku-field input{padding:6px 8px;background:rgba(255,255,255,.05);border:1px solid rgba(168,85,247,.2);border-radius:8px;font-size:12px;color:#fff;outline:none;width:100%;}
@@ -133,6 +126,7 @@
   .row-label{font-size:12px;color:rgba(196,181,253,.6);margin:10px 0 6px;font-weight:600;letter-spacing:.5px;}
   .sku-title{display:flex;align-items:center;gap:12px;font-size:14px;font-weight:700;background:linear-gradient(90deg,#e9d5ff,#f0abfc);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;margin:14px 0 8px;flex-wrap:wrap;}
   .sku-title button{-webkit-text-fill-color:#fff;}
+  .sku-error{color:#fca5a5;font-size:13px;margin:10px 0;padding:10px 14px;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);border-radius:12px;}
 
   .table-wrap{overflow-x:auto;overflow-y:visible;border-radius:14px;border:1px solid rgba(168,85,247,.2);margin-bottom:12px;background:rgba(20,10,45,.5);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);}
   table{border-collapse:collapse;font-size:12px;table-layout:fixed;min-width:100%;}
@@ -328,7 +322,7 @@ document.getElementById('fakeUser').addEventListener('keydown', function(e){if(e
 })();
 
 /* =========================================================
-   数据：无忧物流-标准（只保留标准线路）
+   数据：无忧物流-标准
    ========================================================= */
 var RATES = [
   {code:"RU",name:"俄罗斯",small:{pu:[{minG:0,maxG:150,p:81,r:17},{minG:150,maxG:300,p:81,r:19},{minG:300,maxG:2000,p:83,r:20}],fei:[{minG:0,maxG:150,p:86.5,r:17},{minG:150,maxG:300,p:86.5,r:19},{minG:300,maxG:2000,p:90,r:20}]},large:[{minG:0,maxG:30000,firstG:500,firstFee:97,stepG:500,stepFee:74}]},
@@ -457,7 +451,6 @@ function showToast(msg){
   setTimeout(function(){t.classList.remove('show');}, 1500);
 }
 
-/* ========== 数字格式化 ========== */
 function fmtFee(v){
   if(v === '暂无') return '暂无';
   return '¥' + v;
@@ -467,7 +460,6 @@ function fmtUsd(v){
   return v + ' USD';
 }
 
-/* ========== SKU 管理 ========== */
 function initSkuList(){
   document.getElementById('skuList').innerHTML = '';
   skuSeq = 0;
@@ -516,7 +508,6 @@ function getSkuList(){
   return list;
 }
 
-/* ========== 全局参数 ========== */
 function getGlobalInputs(){
   return {
     rate: parseFloat(document.getElementById('rate').value) || 6.7,
@@ -530,7 +521,6 @@ function getGlobalInputs(){
   };
 }
 
-/* ========== 计费逻辑 ========== */
 function calcBillingWeight(sku, g){
   var actual = sku.weight;
   if(!g.useVolumetric) return actual;
@@ -605,7 +595,21 @@ function calcSalePrice(cost, fee, warehouseFee, commission, profit, rate){
   return (cost + fee + warehouseFee) / denom / rate;
 }
 
-/* ========== 批量计算 ========== */
+/* ===== 校验：重量和类型必须匹配 ===== */
+function validateSku(sku, goodsType){
+  var w = sku.weight;
+  var isLargeType = (goodsType === 'pu_large' || goodsType === 'fei_large');
+  var isSmallType = (goodsType === 'pu' || goodsType === 'fei');
+
+  if(w <= 2000 && isLargeType){
+    return '重量 ' + w + 'g ≤ 2000g，请选“普货”或“带电”';
+  }
+  if(w > 2000 && isSmallType){
+    return '重量 ' + w + 'g > 2000g，请选“超2kg-普货”或“超2kg-带电”';
+  }
+  return null;
+}
+
 function calculateAll(){
   var g = getGlobalInputs();
   var skus = getSkuList();
@@ -615,8 +619,20 @@ function calculateAll(){
 
   var allPrices = [];
   var allProfitRates = [];
+  var hasError = false;
 
   skus.forEach(function(sku){
+    var err = validateSku(sku, g.goodsType);
+    if(err){
+      hasError = true;
+      var errDiv = document.createElement('div');
+      errDiv.className = 'sku-error';
+      errDiv.textContent = 'SKU：' + sku.code + ' 错误：' + err;
+      resultsDiv.appendChild(errDiv);
+      showToast('SKU：' + sku.code + ' ' + err);
+      return;
+    }
+
     var rows = [];
     var prices = [];
 
@@ -673,6 +689,10 @@ function calculateAll(){
   document.getElementById('countryCount').textContent = allPrices.length;
   document.getElementById('avgPrice').textContent = avgAll.toFixed(2);
   document.getElementById('avgProfitRate').textContent = (avgProfitRate * 100).toFixed(2);
+
+  if(hasError){
+    showToast('部分 SKU 重量与类型不匹配，请修改后重新计算');
+  }
 }
 
 function renderTransposedTable(rows, container, label){
