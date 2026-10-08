@@ -219,6 +219,7 @@
       <button class="secondary" onclick="addSku()">+ 添加 SKU</button>
       <button class="primary" onclick="calculateAll()">批量计算</button>
       <button class="secondary" onclick="exportCSV()">导出 CSV</button>
+      <button class="primary" onclick="copyMultiSku()">📦 合并复制所有SKU（列优先）</button>
     </div>
   </div>
 
@@ -434,7 +435,7 @@ var RATES = [
   {code:"KI",name:"基里巴斯",small:{pu:[{minG:0,maxG:2000,p:172.4,r:17}],fei:[{minG:0,maxG:2000,p:172.4,r:18}]},large:[]},
   {code:"GQ",name:"赤道几内亚",small:{pu:[{minG:0,maxG:2000,p:205.1,r:17}],fei:[{minG:0,maxG:2000,p:205.1,r:18}]},large:[{minG:0,maxG:30000,firstG:500,firstFee:376.2,stepG:500,stepFee:155.3}]},
   {code:"CM",name:"喀麦隆",small:{pu:[{minG:0,maxG:2000,p:175,r:25}],fei:[{minG:0,maxG:2000,p:175,r:26}]},large:[]},
-  {code:"MN",name:"蒙古",small:{pu:[{minG:0,maxG:2000,p:149.38,r:0.65}],fei:[{minG:0,maxG:2000,p:149.38,r:0.65}]},large:[]}
+  {code:"MN",name:"蒙古",small:[{minG:0,maxG:2000,p:149.38,r:0.65}],fei:[{minG:0,maxG:2000,p:149.38,r:0.65}]},large:[]}
 ];
 
 var lastResults = [];
@@ -757,6 +758,31 @@ function copySingleColumn(countryCode){
   var prices = [];
   rows.forEach(function(r){ if(r.listUsd !== '暂无') prices.push(r.listUsd); });
   copyText(prices.join('\n'), '已复制 ' + prices.length + ' 个SKU的标价');
+}
+
+// 合并复制所有SKU（列优先，直接贴入Excel大片区域）
+function copyMultiSku(){
+  if(!lastResults.length){ showToast('无数据，请先计算'); return; }
+  var skus = getSkuList();
+  if(skus.length < 2){ showToast('请至少添加2个SKU'); return; }
+
+  // 1. 获取所有SKU编码
+  var skuCodes = skus.map(function(s){return s.code;});
+
+  // 2. 以 RATES 的国家顺序为准，构建列优先矩阵
+  var lines = [];
+  RATES.forEach(function(c){
+    var rowData = [];
+    skuCodes.forEach(function(skuCode){
+      var found = lastResults.find(function(r){
+        return r.sku === skuCode && r.code === c.code;
+      });
+      rowData.push(found && found.listUsd !== '暂无' ? found.listUsd : '');
+    });
+    lines.push(rowData.join('\t'));
+  });
+
+  copyText(lines.join('\n'), '已合并复制 ' + RATES.length + ' 个国家 × ' + skuCodes.length + ' 个SKU');
 }
 
 function copyText(text, msg){
