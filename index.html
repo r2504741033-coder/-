@@ -435,7 +435,7 @@ var RATES = [
   {code:"KI",name:"基里巴斯",small:{pu:[{minG:0,maxG:2000,p:172.4,r:17}],fei:[{minG:0,maxG:2000,p:172.4,r:18}]},large:[]},
   {code:"GQ",name:"赤道几内亚",small:{pu:[{minG:0,maxG:2000,p:205.1,r:17}],fei:[{minG:0,maxG:2000,p:205.1,r:18}]},large:[{minG:0,maxG:30000,firstG:500,firstFee:376.2,stepG:500,stepFee:155.3}]},
   {code:"CM",name:"喀麦隆",small:{pu:[{minG:0,maxG:2000,p:175,r:25}],fei:[{minG:0,maxG:2000,p:175,r:26}]},large:[]},
-  {code:"MN",name:"蒙古",small:[{minG:0,maxG:2000,p:149.38,r:0.65}],fei:[{minG:0,maxG:2000,p:149.38,r:0.65}]},large:[]}
+  {code:"MN",name:"蒙古",small:{pu:[{minG:0,maxG:2000,p:149.38,r:0.65}],fei:[{minG:0,maxG:2000,p:149.38,r:0.65}]},large:[]}
 ];
 
 var lastResults = [];
@@ -742,7 +742,6 @@ function renderTransposedTable(rows, container, label, showDiscount){
   container.appendChild(wrap);
 }
 
-// 按行复制（当前 SKU 全部国家）
 function copySkuPrices(skuCode){
   var rows = lastResults.filter(function(r){return r.sku === skuCode;});
   if(!rows.length){ showToast('无数据'); return; }
@@ -751,7 +750,6 @@ function copySkuPrices(skuCode){
   copyText(prices.join('\t'), '已复制 ' + prices.length + ' 个国家的标价');
 }
 
-// 按列复制（当前国家 全部 SKU）
 function copySingleColumn(countryCode){
   var rows = lastResults.filter(function(r){return r.code === countryCode;});
   if(!rows.length){ showToast('无数据'); return; }
@@ -760,16 +758,13 @@ function copySingleColumn(countryCode){
   copyText(prices.join('\n'), '已复制 ' + prices.length + ' 个SKU的标价');
 }
 
-// 合并复制所有SKU（列优先，直接贴入Excel大片区域）
 function copyMultiSku(){
   if(!lastResults.length){ showToast('无数据，请先计算'); return; }
   var skus = getSkuList();
   if(skus.length < 2){ showToast('请至少添加2个SKU'); return; }
 
-  // 1. 获取所有SKU编码
   var skuCodes = skus.map(function(s){return s.code;});
 
-  // 2. 以 RATES 的国家顺序为准，构建列优先矩阵
   var lines = [];
   RATES.forEach(function(c){
     var rowData = [];
