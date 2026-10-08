@@ -743,17 +743,17 @@ function renderTransposedTable(rows, container, label, showDiscount){
 function copySkuPrices(skuCode){
   var rows = lastResults.filter(function(r){return r.sku === skuCode;});
   if(!rows.length){ showToast('无数据'); return; }
-  var g = getGlobalInputs();
-  var showDiscount = g.discountRate > 0;
-  var lines = [];
-  if(showDiscount){
-    lines.push('国家\t实际售价(USD)\t标价(USD)');
-    rows.forEach(function(r){ lines.push(r.name + '\t' + r.saleUsd + '\t' + r.listUsd); });
-  }else{
-    lines.push('国家\t实际售价(USD)');
-    rows.forEach(function(r){ lines.push(r.name + '\t' + r.saleUsd); });
-  }
-  copyText(lines.join('\n'), '已复制 ' + rows.length + ' 个国家的售价');
+  
+  // 只提取标价 (listUsd)，并且过滤掉“暂无”
+  var prices = [];
+  rows.forEach(function(r){ 
+    if(r.listUsd !== '暂无') {
+      prices.push(r.listUsd); 
+    }
+  });
+  
+  // 用制表符横向拼接，直接复制纯数字
+  copyText(prices.join('\t'), '已复制 ' + prices.length + ' 个国家的标价');
 }
 
 function copyText(text, msg){
