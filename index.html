@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>无忧物流-标准 区域定价工具</title>
-
 <style>
   *{box-sizing:border-box;margin:0;padding:0}
   html,body{height:100%}
@@ -322,15 +321,8 @@ function showToast(msg){
   t.classList.add('show');
   setTimeout(function(){t.classList.remove('show');}, 1500);
 }
-
-function fmtFee(v){
-  if(v === '暂无') return '暂无';
-  return '¥' + v;
-}
-function fmtUsd(v){
-  if(v === '暂无') return '暂无';
-  return v + ' USD';
-}
+function fmtFee(v){ if(v === '暂无') return '暂无'; return '¥' + v; }
+function fmtUsd(v){ if(v === '暂无') return '暂无'; return v + ' USD'; }
 
 function initSkuList(){
   document.getElementById('skuList').innerHTML = '';
@@ -366,10 +358,7 @@ function addSku(preset){
   document.getElementById('skuList').appendChild(row);
 }
 
-function removeSku(id){
-  var el = document.getElementById(id);
-  if(el) el.remove();
-}
+function removeSku(id){ var el = document.getElementById(id); if(el) el.remove(); }
 
 function getSkuList(){
   var rows = document.querySelectorAll('.sku-row');
@@ -443,9 +432,7 @@ function calcLarge(country, billingG){
   if(!tiers || !tiers.length) return {fee:null, type:'大包暂无'};
   var tier = findTier(tiers, billingG);
   if(!tier) return {fee:null, type:'超大包范围'};
-  if(billingG <= tier.firstG){
-    return {fee: tier.firstFee, type:'大包'};
-  }
+  if(billingG <= tier.firstG){ return {fee: tier.firstFee, type:'大包'}; }
   var extra = billingG - tier.firstG;
   var steps = Math.ceil(extra / tier.stepG);
   var fee = tier.firstFee + steps * tier.stepFee;
@@ -461,9 +448,7 @@ function calcLogistics(country, sku, g, goodsType){
   else if(sel === 'fei')  { goodsBase = 'fei'; forceLarge = false; }
   else if(sel === 'pu_large')  { goodsBase = 'pu';  forceLarge = true; }
   else if(sel === 'fei_large') { goodsBase = 'fei'; forceLarge = true; }
-  if(forceLarge || isLargePackage(sku, billingG)){
-    return calcLarge(country, billingG);
-  }
+  if(forceLarge || isLargePackage(sku, billingG)){ return calcLarge(country, billingG); }
   return calcSmall(country, billingG, goodsBase);
 }
 
@@ -593,17 +578,15 @@ function copyMultiSku(){
   var skus = getSkuList();
   var skuCodes = skus.map(function(s){return s.code;});
   var lines = [];
-  // 遍历 SKU（行）
   skuCodes.forEach(function(skuCode){
     var rowData = [];
-    // 遍历国家（列）
     RATES.forEach(function(c){
       var found = lastResults.find(function(r){
         return r.sku === skuCode && r.code === c.code;
       });
       rowData.push(found && found.listUsd !== '暂无' ? found.listUsd : '');
     });
-    lines.push(rowData.join('\t')); // 每个SKU一整行，用Tab分隔
+    lines.push(rowData.join('\t'));
   });
   copyText(lines.join('\n'), '已合并复制 ' + skuCodes.length + ' 个SKU × ' + RATES.length + ' 个国家');
 }
