@@ -686,7 +686,7 @@ function calculateAll(){
     rows.forEach(function(r){
       if(r.saleUsd !== '暂无'){
         var s = parseFloat(r.saleUsd);
-        r.adjust = ((s/avg - 1) * 100).toFixed(2) + '%';
+        r.adjust = Math.round((s/avg - 1) * 100) + '%';
         r.diff = (s - avg).toFixed(2);
       }else{
         r.adjust = '暂无'; r.diff = '暂无';
