@@ -139,6 +139,8 @@
   tbody tr:hover{background:rgba(168,85,247,.08);}
   td{color:#d8cff0;}
 
+  .copy-control{display:inline-flex;align-items:center;gap:4px;font-size:10px;color:#c4b5fd;white-space:nowrap;margin-left:2px;vertical-align:middle;}
+  .copy-control input{accent-color:#10b981;cursor:pointer;margin:0;width:13px;height:13px;}
   .toast{position:fixed;top:24px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,#8b5cf6,#d946ef);color:#fff;padding:12px 24px;border-radius:14px;font-size:13px;font-weight:600;z-index:999999;opacity:0;transition:opacity .3s, transform .3s;pointer-events:none;box-shadow:0 12px 40px rgba(168,85,247,.6);backdrop-filter:blur(10px);}
   .toast.show{opacity:1;transform:translateX(-50%) translateY(4px);}
 </style>
@@ -202,7 +204,6 @@
       <label>佣金%</label><input id="commission" type="number" value="11" step="0.01">
       <label>汇率</label><input id="rate" type="number" value="6.7" step="0.01">
       <label>税率%</label><input id="taxRate" type="number" value="0" step="0.01">
-      <label>仓库操作费</label><input id="warehouseFee" type="number" value="4" step="0.01">
       <label>预留折扣%</label><input id="discountRate" type="number" value="0" step="0.01">
       <label>抛重系数</label>
       <select id="divisor"><option value="8000">8000</option><option value="6000">6000</option><option value="5000">5000</option></select>
@@ -438,6 +439,16 @@ var RATES = [
 
 var lastResults = [];
 var skuSeq = 0;
+// 三种复制功能独立授权，默认全部关闭，避免误复制错误类型的数据。
+var copyPermissions = { price: false, adjustment: false, listPrice: false };
+
+function setCopyPermission(type, enabled){
+  copyPermissions[type] = !!enabled;
+  // 同步页面上所有 SKU 行里相同功能的开关。
+  document.querySelectorAll('[data-copy-permission="' + type + '"]').forEach(function(el){
+    el.checked = !!enabled;
+  });
+}
 
 function showToast(msg){
   var t = document.getElementById('toast');
@@ -518,7 +529,6 @@ function getGlobalInputs(){
     commission: (parseFloat(document.getElementById('commission').value) || 0) / 100,
     profit: (parseFloat(document.getElementById('profit').value) || 0) / 100,
     taxRate: (parseFloat(document.getElementById('taxRate').value) || 0) / 100,
-    warehouseFee: parseFloat(document.getElementById('warehouseFee').value) || 0,
     discountRate: (parseFloat(document.getElementById('discountRate').value) || 0) / 100,
     divisor: parseFloat(document.getElementById('divisor').value) || 8000,
     useVolumetric: document.getElementById('useVolumetric').checked
@@ -592,11 +602,11 @@ function calcLogistics(country, sku, g, goodsType){
   return calcSmall(country, billingG, goodsBase);
 }
 
-function calcSalePrice(cost, fee, warehouseFee, commission, profit, rate){
+function calcSalePrice(cost, fee, commission, profit, rate){
   if(fee === null) return null;
   var denom = 1 - commission - profit;
   if(denom <= 0) return null;
-  return (cost + fee + warehouseFee) / denom / rate;
+  return (cost + fee) / denom / rate;
 }
 
 function validateSku(sku, goodsType){
@@ -642,7 +652,7 @@ function calculateAll(){
 
     RATES.forEach(function(c){
       var log = calcLogistics(c, sku, g, sku.goodsType);
-      var saleUsd = calcSalePrice(sku.cost, log.fee, g.warehouseFee, g.commission, g.profit, g.rate);
+      var saleUsd = calcSalePrice(sku.cost, log.fee, g.commission, g.profit, g.rate);
       var listUsd = null;
       if(saleUsd !== null){
         if(showDiscount){
@@ -652,7 +662,7 @@ function calculateAll(){
         }
       }
       var taxUsd = saleUsd === null ? null : saleUsd * (1 + g.taxRate);
-      var profitUsd = saleUsd === null ? null : saleUsd - sku.cost/g.rate - (log.fee || 0)/g.rate - g.warehouseFee/g.rate - saleUsd * g.commission;
+      var profitUsd = saleUsd === null ? null : saleUsd - sku.cost/g.rate - (log.fee || 0)/g.rate - saleUsd * g.commission;
       var row = {
         sku: sku.code, name: c.name, code: c.code,
         weightG: sku.weight,
@@ -689,7 +699,12 @@ function calculateAll(){
     var typeName = {pu:'普货', fei:'带电', pu_large:'超2kg-普货', fei_large:'超2kg-带电'}[sku.goodsType] || sku.goodsType;
     title.innerHTML = 'SKU：' + sku.code +
       '（重 ' + sku.weight + 'g，尺寸 ' + sku.length + '×' + sku.width + '×' + sku.height + '，成本 ¥' + sku.cost + '，类型 ' + typeName + '）' +
-      ' <button class="copy" onclick="copySkuPrices(\'' + sku.code + '\')">复制售价</button>';
+      ' <button class="copy" onclick="copySkuPrices(\'' + sku.code + '\')">复制售价</button>' +
+      ' <label class="copy-control"><input type="checkbox" data-copy-permission="price" ' + (copyPermissions.price ? 'checked' : '') + ' onchange="setCopyPermission(\'price\',this.checked)">允许复制</label>' +
+      ' <button class="copy" onclick="copySkuAdjustments(\'' + sku.code + '\')">复制调整</button>' +
+      ' <label class="copy-control"><input type="checkbox" data-copy-permission="adjustment" ' + (copyPermissions.adjustment ? 'checked' : '') + ' onchange="setCopyPermission(\'adjustment\',this.checked)">允许复制</label>' +
+      ' <button class="copy" onclick="copySkuListPrices(\'' + sku.code + '\')">复制标价</button>' +
+      ' <label class="copy-control"><input type="checkbox" data-copy-permission="listPrice" ' + (copyPermissions.listPrice ? 'checked' : '') + ' onchange="setCopyPermission(\'listPrice\',this.checked)">允许复制</label>';
     resultsDiv.appendChild(title);
 
     var half = Math.ceil(rows.length / 2);
@@ -741,19 +756,31 @@ function renderTransposedTable(rows, container, label, showDiscount){
 }
 
 function copySkuPrices(skuCode){
+  if(!copyPermissions.price){ showToast('复制售价失败，请先打开复制售价开关'); return; }
   var rows = lastResults.filter(function(r){return r.sku === skuCode;});
   if(!rows.length){ showToast('无数据'); return; }
-  var g = getGlobalInputs();
-  var showDiscount = g.discountRate > 0;
-  var lines = [];
-  if(showDiscount){
-    lines.push('国家\t实际售价(USD)\t标价(USD)');
-    rows.forEach(function(r){ lines.push(r.name + '\t' + r.saleUsd + '\t' + r.listUsd); });
-  }else{
-    lines.push('国家\t实际售价(USD)');
-    rows.forEach(function(r){ lines.push(r.name + '\t' + r.saleUsd); });
-  }
-  copyText(lines.join('\n'), '已复制 ' + rows.length + ' 个国家的售价');
+  // 单行、制表符分隔：粘贴到表格时按国家列从左到右横向填充。
+  // 国家顺序完全沿用 RATES / 计算结果的原有顺序。
+  var prices = rows.map(function(r){ return r.saleUsd; });
+  copyText(prices.join('\t'), '复制售价成功');
+}
+
+function copySkuAdjustments(skuCode){
+  if(!copyPermissions.adjustment){ showToast('复制调整失败，请先打开复制调整开关'); return; }
+  var rows = lastResults.filter(function(r){return r.sku === skuCode;});
+  if(!rows.length){ showToast('无数据'); return; }
+  // 单行、制表符分隔：按国家列从左到右横向填充，顺序沿用计算结果。
+  var adjustments = rows.map(function(r){ return r.adjust; });
+  copyText(adjustments.join('\t'), '复制调整成功');
+}
+
+function copySkuListPrices(skuCode){
+  if(!copyPermissions.listPrice){ showToast('复制标价失败，请先打开复制标价开关'); return; }
+  var rows = lastResults.filter(function(r){return r.sku === skuCode;});
+  if(!rows.length){ showToast('无数据'); return; }
+  // 单行、制表符分隔：按国家列从左到右横向填充，顺序沿用计算结果。
+  var listPrices = rows.map(function(r){ return r.listUsd; });
+  copyText(listPrices.join('\t'), '复制标价成功');
 }
 
 function copyText(text, msg){
@@ -769,7 +796,7 @@ function fallbackCopy(text, msg){
   var ta = document.createElement('textarea');
   ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
   document.body.appendChild(ta); ta.select();
-  try{ document.execCommand('copy'); showToast(msg || '已复制'); }
+  try{ var copied = document.execCommand('copy'); showToast(copied ? (msg || '已复制') : '复制失败，请手动复制'); }
   catch(e){ showToast('复制失败，请手动复制'); }
   document.body.removeChild(ta);
 }
