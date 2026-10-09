@@ -440,7 +440,7 @@ var RATES = [
 var lastResults = [];
 var skuSeq = 0;
 // 三种复制功能独立授权，默认全部关闭，避免误复制错误类型的数据。
-var copyPermissions = { price: false, adjustment: false, listPrice: false };
+var copyPermissions = { price: false, adjustment: false, listPrice: false, diff: false };
 
 function setCopyPermission(type, enabled){
   copyPermissions[type] = !!enabled;
@@ -704,7 +704,9 @@ function calculateAll(){
       ' <button class="copy" onclick="copySkuAdjustments(\'' + sku.code + '\')">复制调整</button>' +
       ' <label class="copy-control"><input type="checkbox" data-copy-permission="adjustment" ' + (copyPermissions.adjustment ? 'checked' : '') + ' onchange="setCopyPermission(\'adjustment\',this.checked)">允许复制</label>' +
       ' <button class="copy" onclick="copySkuListPrices(\'' + sku.code + '\')">复制标价</button>' +
-      ' <label class="copy-control"><input type="checkbox" data-copy-permission="listPrice" ' + (copyPermissions.listPrice ? 'checked' : '') + ' onchange="setCopyPermission(\'listPrice\',this.checked)">允许复制</label>';
+      ' <label class="copy-control"><input type="checkbox" data-copy-permission="listPrice" ' + (copyPermissions.listPrice ? 'checked' : '') + ' onchange="setCopyPermission(\'listPrice\',this.checked)">允许复制</label>' +
+      ' <button class="copy" onclick="copySkuDiffs(\'' + sku.code + '\')">复制差价</button>' +
+      ' <label class="copy-control"><input type="checkbox" data-copy-permission="diff" ' + (copyPermissions.diff ? 'checked' : '') + ' onchange="setCopyPermission(\'diff\',this.checked)">允许复制</label>';
     resultsDiv.appendChild(title);
 
     var half = Math.ceil(rows.length / 2);
@@ -781,6 +783,15 @@ function copySkuListPrices(skuCode){
   // 单行、制表符分隔：按国家列从左到右横向填充，顺序沿用计算结果。
   var listPrices = rows.map(function(r){ return r.listUsd; });
   copyText(listPrices.join('\t'), '复制标价成功');
+}
+
+function copySkuDiffs(skuCode){
+  if(!copyPermissions.diff){ showToast('复制差价失败，请先打开复制差价开关'); return; }
+  var rows = lastResults.filter(function(r){return r.sku === skuCode;});
+  if(!rows.length){ showToast('无数据'); return; }
+  // 单行、制表符分隔：按国家列从左到右横向填充，顺序沿用计算结果。
+  var diffs = rows.map(function(r){ return r.diff; });
+  copyText(diffs.join('\t'), '复制差价成功');
 }
 
 function copyText(text, msg){
